@@ -52,6 +52,7 @@ public class SessionElementsAggregateFunction implements AggregateFunction<Event
 
             if (lastEvent.getOrder() != null) {
                 sessionBuilder
+                        .withId(lastEvent.getOrder().getId())
                         .withKey(lastEvent.getKey())
                         .withWindowFrom(lastEvent.getTimestamp())
                         .withWindowTo(lastEvent.getTimestamp());
@@ -59,6 +60,7 @@ public class SessionElementsAggregateFunction implements AggregateFunction<Event
                 PageView firstPageView = accumulator.firstEvent().getPageView();
 
                 sessionBuilder
+                        .withId(accumulator.firstEvent().getPageView().getId())
                         .withKey(lastEvent.getKey())
                         .withWindowFrom(lastEvent.getTimestamp())
                         .withWindowTo(lastEvent.getTimestamp() + sessionTimeout)

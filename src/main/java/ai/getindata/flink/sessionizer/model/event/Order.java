@@ -9,5 +9,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class Order {
 
+    private String id;
     private long timestamp;
 }
