@@ -1,4 +1,4 @@
-package ai.getindata.flink.sessionizer.sessionwindow;
+package com.getindata.flink.sessionizer.sessionwindow;
 
 import org.apache.flink.streaming.api.windowing.triggers.Trigger;
 import org.apache.flink.streaming.api.windowing.triggers.TriggerResult;

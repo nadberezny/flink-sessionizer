@@ -1,10 +1,10 @@
-package ai.getindata.flink.sessionizer.functions;
+package com.getindata.flink.sessionizer.functions;
 
-import ai.getindata.flink.sessionizer.model.Event;
-import ai.getindata.flink.sessionizer.model.Session;
-import ai.getindata.flink.sessionizer.model.comparators.EventComparator;
-import ai.getindata.flink.sessionizer.model.event.PageView;
-import ai.getindata.flink.sessionizer.sessionwindow.SessionWindowAccumulator;
+import com.getindata.flink.sessionizer.model.Event;
+import com.getindata.flink.sessionizer.model.Session;
+import com.getindata.flink.sessionizer.model.comparators.EventComparator;
+import com.getindata.flink.sessionizer.model.event.PageView;
+import com.getindata.flink.sessionizer.sessionwindow.SessionWindowAccumulator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.flink.api.common.functions.AggregateFunction;

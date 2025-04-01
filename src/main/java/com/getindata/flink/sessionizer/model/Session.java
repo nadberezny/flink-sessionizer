@@ -1,4 +1,4 @@
-package ai.getindata.flink.sessionizer.model;
+package com.getindata.flink.sessionizer.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

@@ -1,6 +1,6 @@
-package ai.getindata.flink.sessionizer.model.comparators;
+package com.getindata.flink.sessionizer.model.comparators;
 
-import ai.getindata.flink.sessionizer.model.Event;
+import com.getindata.flink.sessionizer.model.Event;
 
 import java.util.Comparator;
 

@@ -1,7 +1,7 @@
-package ai.getindata.flink.sessionizer.sessionwindow;
+package com.getindata.flink.sessionizer.sessionwindow;
 
-import ai.getindata.flink.sessionizer.model.Event;
-import ai.getindata.flink.sessionizer.typing.EventListTypeInfoFactory;
+import com.getindata.flink.sessionizer.model.Event;
+import com.getindata.flink.sessionizer.typing.EventListTypeInfoFactory;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;

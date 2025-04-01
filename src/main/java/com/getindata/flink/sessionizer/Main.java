@@ -1,12 +1,12 @@
-package ai.getindata.flink.sessionizer;
+package com.getindata.flink.sessionizer;
 
-import ai.getindata.flink.sessionizer.functions.SessionElementsAggregateFunction;
-import ai.getindata.flink.sessionizer.functions.SessionProcessor;
-import ai.getindata.flink.sessionizer.model.Event;
-import ai.getindata.flink.sessionizer.model.Key;
-import ai.getindata.flink.sessionizer.model.OrderWithSessions;
-import ai.getindata.flink.sessionizer.model.Session;
-import ai.getindata.flink.sessionizer.sessionwindow.SessionElementWindowAssigner;
+import com.getindata.flink.sessionizer.functions.SessionElementsAggregateFunction;
+import com.getindata.flink.sessionizer.functions.SessionProcessor;
+import com.getindata.flink.sessionizer.model.Event;
+import com.getindata.flink.sessionizer.model.Key;
+import com.getindata.flink.sessionizer.model.OrderWithSessions;
+import com.getindata.flink.sessionizer.model.Session;
+import com.getindata.flink.sessionizer.sessionwindow.SessionElementWindowAssigner;
 import org.apache.flink.api.java.functions.KeySelector;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.datastream.SideOutputDataStream;

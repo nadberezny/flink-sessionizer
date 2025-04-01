@@ -1,7 +1,7 @@
-package ai.getindata.flink.sessionizer.sessionwindow;
+package com.getindata.flink.sessionizer.sessionwindow;
 
-import ai.getindata.flink.sessionizer.model.Event;
-import ai.getindata.flink.sessionizer.model.event.PageView;
+import com.getindata.flink.sessionizer.model.Event;
+import com.getindata.flink.sessionizer.model.event.PageView;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.flink.api.common.ExecutionConfig;
 import org.apache.flink.api.common.typeinfo.Types;

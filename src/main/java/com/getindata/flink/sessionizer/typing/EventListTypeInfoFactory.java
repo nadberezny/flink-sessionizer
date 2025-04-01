@@ -1,6 +1,6 @@
-package ai.getindata.flink.sessionizer.typing;
+package com.getindata.flink.sessionizer.typing;
 
-import ai.getindata.flink.sessionizer.model.Event;
+import com.getindata.flink.sessionizer.model.Event;
 import org.apache.flink.api.common.typeinfo.TypeInformation;
 import org.apache.flink.api.common.typeinfo.Types;
 

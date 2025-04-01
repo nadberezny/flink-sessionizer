@@ -1,9 +1,9 @@
-package ai.getindata.flink.sessionizer.functions;
+package com.getindata.flink.sessionizer.functions;
 
-import ai.getindata.flink.sessionizer.model.Key;
-import ai.getindata.flink.sessionizer.model.OrderWithSessions;
-import ai.getindata.flink.sessionizer.model.Session;
-import ai.getindata.flink.sessionizer.model.event.Order;
+import com.getindata.flink.sessionizer.model.Key;
+import com.getindata.flink.sessionizer.model.OrderWithSessions;
+import com.getindata.flink.sessionizer.model.Session;
+import com.getindata.flink.sessionizer.model.event.Order;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.flink.api.common.state.MapState;
 import org.apache.flink.api.common.state.MapStateDescriptor;

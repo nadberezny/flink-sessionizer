@@ -1,7 +1,7 @@
-package ai.getindata.flink.sessionizer.sessionwindow;
+package com.getindata.flink.sessionizer.sessionwindow;
 
-import ai.getindata.flink.sessionizer.model.MarketingChannel;
-import ai.getindata.flink.sessionizer.model.Key;
+import com.getindata.flink.sessionizer.model.MarketingChannel;
+import com.getindata.flink.sessionizer.model.Key;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;

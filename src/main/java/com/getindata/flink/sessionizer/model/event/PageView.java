@@ -1,6 +1,6 @@
-package ai.getindata.flink.sessionizer.model.event;
+package com.getindata.flink.sessionizer.model.event;
 
-import ai.getindata.flink.sessionizer.model.MarketingChannel;
+import com.getindata.flink.sessionizer.model.MarketingChannel;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;

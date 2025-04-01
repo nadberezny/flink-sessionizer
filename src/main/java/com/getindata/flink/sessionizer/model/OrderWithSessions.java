@@ -1,6 +1,6 @@
-package ai.getindata.flink.sessionizer.model;
+package com.getindata.flink.sessionizer.model;
 
-import ai.getindata.flink.sessionizer.model.event.Order;
+import com.getindata.flink.sessionizer.model.event.Order;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;

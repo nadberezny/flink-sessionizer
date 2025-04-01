@@ -1,4 +1,4 @@
-package ai.getindata.flink.sessionizer.typing;
+package com.getindata.flink.sessionizer.typing;
 
 import org.apache.flink.api.common.typeinfo.TypeInfoFactory;
 import org.apache.flink.api.common.typeinfo.TypeInformation;
