@@ -1,4 +1,4 @@
-package com.getindata.flink.sessionizer.functions;
+package com.getindata.flink.sessionizer.function;
 
 import com.getindata.flink.sessionizer.model.Key;
 import com.getindata.flink.sessionizer.model.OrderWithSessions;

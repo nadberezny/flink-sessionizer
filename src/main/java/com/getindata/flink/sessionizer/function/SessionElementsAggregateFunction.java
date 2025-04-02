@@ -1,4 +1,4 @@
-package com.getindata.flink.sessionizer.functions;
+package com.getindata.flink.sessionizer.function;
 
 import com.getindata.flink.sessionizer.model.Event;
 import com.getindata.flink.sessionizer.model.Session;
@@ -49,6 +49,9 @@ public class SessionElementsAggregateFunction implements AggregateFunction<Event
         try {
             Event lastEvent = accumulator.lastEvent();
             Session.SessionBuilder sessionBuilder = Session.builder();
+            sessionBuilder
+                    .withTimestamp(lastEvent.getTimestamp())
+                    .withLastEvent(lastEvent);
 
             if (lastEvent.getOrder() != null) {
                 sessionBuilder
@@ -70,7 +73,7 @@ public class SessionElementsAggregateFunction implements AggregateFunction<Event
                         .withLandingPage(firstPageView.getLandingPage());
 
             }
-            return new Session();
+            return sessionBuilder.build();
         } catch (RuntimeException e) {
             log.error("Failed to create Session out of {}", accumulator);
             throw e;
