@@ -1,13 +1,13 @@
 package com.getindata.flink.sessionizer;
 
-import com.getindata.flink.sessionizer.model.Event;
-import com.getindata.flink.sessionizer.model.Key;
-import com.getindata.flink.sessionizer.model.event.Order;
-import com.getindata.flink.sessionizer.model.event.PageView;
+import com.getindata.flink.sessionizer.serde.input.Event;
+import com.getindata.flink.sessionizer.serde.input.Order;
+import com.getindata.flink.sessionizer.serde.input.PageView;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
+import java.math.BigInteger;
 import java.time.Duration;
 import java.time.Instant;
 
@@ -22,10 +22,20 @@ public class MainIntegrationTest {
     @Test
     void test(IntegrationTestExtension.IntegrationTextCtx ctx) throws Exception {
         // given
+        var key1 = "key1";
+        var user1 = "user1";
         var t1 = Instant.parse("2025-04-09T00:00:00Z");
         var t2 = Instant.parse("2025-04-09T01:00:00Z");
-        var pv1 = new Event(t1.toEpochMilli(), "UTC", new Key("k1"), new PageView(), null);
-        var order1 = new Event(t2.toEpochMilli(), "UTC", new Key("k1"), null, new Order("order1", t2.toEpochMilli()));
+        var pv1 = new Event(
+                new PageView(user1, null, "https://mystore.com", "channel1", null, null, null, null, null, "ip1", null),
+                null, key1, "pageview", "frontend1", "n/a", "n/a", t1.toString()
+        );
+//        var pv2 = new Event(
+//                new PageView(user1, null, null, null, null, null, null, null, null, null, null),
+//                null, key1, null, null, null, null, t1.toString()
+//        );
+        var order1 = new Event(null, new Order(user1, "order1", null, null, null, BigInteger.valueOf(100), null, null, null, null, null, null, null, null),
+                key1, "order", "frontend1", "n/a", "n/a", t2.toString());
 
         // when
         ctx.eventProducer().send(

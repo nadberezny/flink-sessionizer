@@ -1,8 +1,8 @@
 package com.getindata.flink.sessionizer;
 
 import com.getindata.flink.sessionizer.config.JobConfig;
-import com.getindata.flink.sessionizer.model.Event;
 import com.getindata.flink.sessionizer.model.OrderWithSessions;
+import com.getindata.flink.sessionizer.serde.input.Event;
 import com.getindata.flink.sessionizer.serde.kafka.JsonSerializer;
 import com.getindata.flink.sessionizer.serde.kafka.OrderWithSessionsDeserializer;
 import lombok.SneakyThrows;
@@ -45,7 +45,6 @@ import static org.apache.commons.lang3.RandomStringUtils.randomAlphabetic;
 import static org.apache.kafka.clients.CommonClientConfigs.GROUP_ID_CONFIG;
 import static org.apache.kafka.clients.admin.AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG;
 import static org.apache.kafka.clients.consumer.ConsumerConfig.AUTO_OFFSET_RESET_CONFIG;
-import static org.apache.kafka.clients.consumer.ConsumerConfig.ISOLATION_LEVEL_CONFIG;
 import static org.apache.kafka.clients.consumer.ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG;
 import static org.apache.kafka.clients.consumer.ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG;
 

@@ -1,6 +1,7 @@
 package com.getindata.flink.sessionizer.serde.kafka;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.getindata.flink.sessionizer.function.InputToEventMap;
 import com.getindata.flink.sessionizer.model.Event;
 import org.apache.flink.api.common.typeinfo.TypeInformation;
 import org.apache.flink.api.common.typeinfo.Types;
@@ -12,10 +13,14 @@ import java.io.IOException;
 
 public class EventDeserializationSchema implements KafkaRecordDeserializationSchema<Event> {
 
+    private final InputToEventMap inputToEventMap = new InputToEventMap();
+
     @Override
     public void deserialize(ConsumerRecord<byte[], byte[]> consumerRecord, Collector<Event> collector) throws IOException {
-        Event event = new ObjectMapper().readValue(consumerRecord.value(), Event.class);
-        collector.collect(event);
+        var input = new ObjectMapper()
+                .readValue(consumerRecord.value(), com.getindata.flink.sessionizer.serde.input.Event.class);
+
+        collector.collect(inputToEventMap.map(input));
     }
 
     @Override
