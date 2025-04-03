@@ -25,7 +25,7 @@ resource "helm_release" "data_gen" {
 
   set {
     name  = "deployment.image.pullPolicy"
-    value = "IfNotPresent"
+    value = "Always"
   }
 
   set {

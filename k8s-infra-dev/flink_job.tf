@@ -1,11 +1,11 @@
 resource "helm_release" "flink_job" {
-  chart            = "../k8s-helm"
+  chart            = "../k8s-helm/flink"
   name             = "flink-sessionizer"
   namespace        = local.namespace_applications
   create_namespace = true
 
   values = [
-    file("../k8s-helm/values.yaml")
+    file("../k8s-helm/flink/values.yaml")
   ]
 
   set {
