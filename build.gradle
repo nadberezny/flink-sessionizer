@@ -2,13 +2,13 @@ plugins {
     id 'java'
     id 'application'
     // shadow plugin to produce fat JARs
-    id 'com.github.johnrengelman.shadow' version '7.1.2'
+    id("com.gradleup.shadow") version "8.3.6"
     id("io.freefair.lombok") version "8.12.2.1"
 }
 // artifact properties
 group = 'org.quickstart'
 version = '0.1-SNAPSHOT'
-mainClassName = 'org.quickstart.DataStreamJob'
+mainClassName = 'com.getindata.flink.sessionizer.Main'
 description = """Flink Quickstart Job"""
 ext {
     targetDockerImageName = 'nadberezny/flink-sessionizer'
@@ -25,6 +25,7 @@ applicationDefaultJvmArgs = ["-Dlog4j.configurationFile=log4j2.properties"]
 
 // declare where to find the dependencies of your project
 repositories {
+    gradlePluginPortal()
     mavenCentral()
     maven {
         url "https://repository.apache.org/content/repositories/snapshots"
@@ -105,10 +106,6 @@ jar {
         attributes 'Built-By': System.getProperty('user.name'),
                 'Build-Jdk': System.getProperty('java.version')
     }
-}
-
-shadowJar {
-    configurations = [project.configurations.flinkShadowJar]
 }
 
 test {
