@@ -9,10 +9,11 @@ data:
 
   # Kafka
   KAFKA_BOOTSTRAP_SERVERS: "{{ .Values.kafka.bootstrapServers }}"
-  INPUT_TOPIC: "{{ .Values.kafka.rawEventInputTopic }}"
+  KAFKA_INPUT_TOPIC: "{{ .Values.kafka.inputTopic }}"
+  KAFKA_OUTPUT_TOPIC: "{{ .Values.kafka.outputTopic }}"
 
   # Session processor
-  SESSION_PROCESSOR_MAX_SESSION_LOOKBACK: "{{ .Values.sessionProcessor.maxSessionLookback }}"
+  SESSION_INACTIVITY_GAP: "{{ .Values.sessionProcessor.maxSessionLookback }}"
   SESSION_PROCESSOR_SESSIONS_CACHE_TTL: "{{ .Values.sessionProcessor.sessionsCacheTTL }}"
 
   # Out of order events

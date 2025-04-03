@@ -20,8 +20,9 @@ job:
 serviceAccount: flink
 
 kafka:
-  bootstrapServers: "strimzi-kafka-kafka-bootstrap.cluster-services.svc.cluster.local:9092"
+  bootstrapServers: "nonexisting:9092"
   inputTopic: "input"
+  outputTopic: "output"
 
 sessionProcessor:
   maxSessionLookback: "P30D"
