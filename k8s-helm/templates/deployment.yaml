@@ -1,0 +1,86 @@
+apiVersion: flink.apache.org/v1beta1
+kind: FlinkDeployment
+metadata:
+  name: {{ .Values.name }}
+  namespace: {{ .Values.namespace }}
+spec:
+  restartNonce: 3
+  image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+  imagePullPolicy: {{ .Values.image.pullPolicy }}
+  flinkVersion: "{{ required "job.flinkVersion is required" .Values.job.flinkVersion }}"
+  flinkConfiguration:
+    akka.ask.timeout: 60 s
+    env.java.opts.all: "--add-opens=java.base/java.lang=ALL-UNNAMED --add-opens=java.base/java.util=ALL-UNNAMED "
+    taskmanager.numberOfTaskSlots: "{{.Values.taskManager.numberOfTaskSlots}}"
+    s3.endpoint: {{ .Values.s3.endpoint }}
+    s3.path-style-access: "true"
+    s3.access-key: {{ .Values.s3.accessKey }}
+    s3.secret-key: {{ .Values.s3.secretKey }}
+    fs.s3a.path.style.access: "true"
+    fs.s3a.access.key: {{ .Values.s3.accessKey }}
+    fs.s3a.secret.key: {{ .Values.s3.secretKey }}
+    state.backend.type: "rocksdb"
+    state.backend.incremental: "true"
+    state.checkpoints.dir: {{ .Values.state.checkpointsDir }}
+    state.savepoints.dir: {{ .Values.state.savepointsDir }}
+    execution.checkpointing.interval: {{ .Values.checkpointing.interval }}
+    execution.checkpointing.min-pause: {{ .Values.checkpointing.minPause }}
+    execution.checkpointing.timeout: {{ .Values.checkpointing.timeout }}
+    high-availability: org.apache.flink.kubernetes.highavailability.KubernetesHaServicesFactory
+    high-availability.storageDir: {{ .Values.ha.dir }}
+    rest.flamegraph.enabled: "{{ .Values.job.rest.flamegraph.enabled }}"
+    restart-strategy.type: exponential-delay
+    restart-strategy.exponential-delay.initial-backoff: 10 s
+    restart-strategy.exponential-delay.max-backoff: 5 min
+    restart-strategy.exponential-delay.backoff-multiplier: "2.0"
+    restart-strategy.exponential-delay.reset-backoff-threshold: 5 min
+    restart-strategy.exponential-delay.jitter-factor: "0.1"
+    kubernetes.taskmanager.cpu.limit-factor: "1.5"
+    kubernetes.operator.job.autoscaler.enabled: "false"
+    kubernetes.operator.job.autoscaler.stabilization.interval: 1m
+    kubernetes.operator.job.autoscaler.metrics.window: 5m
+    kubernetes.operator.job.autoscaler.target.utilization: "0.6"
+    kubernetes.operator.job.autoscaler.target.utilization.boundary: "0.2"
+    kubernetes.operator.job.autoscaler.restart.time: 2m
+    kubernetes.operator.job.autoscaler.catch-up.duration: 5m
+    kubernetes.operator.job.restart.failed: "true"
+    kubernetes.operator.periodic.savepoint.interval: 24h
+    pipeline.max-parallelism: "{{ .Values.execution.maxParallelism}}"
+    heartbeat.timeout: "120000"
+    pipeline.auto-watermark-interval: {{ .Values.execution.autoWatermarkInterval }}
+    jobmanager.memory.process.size: 512mb
+  serviceAccount: {{ .Values.serviceAccount }}
+  jobManager:
+    resource:
+      memory: {{ .Values.jobManager.memorySize }}
+      cpu: {{ .Values.jobManager.cpu }}
+    podTemplate:
+      spec:
+        containers:
+          - name: flink-main-container
+            envFrom:
+              - configMapRef:
+                  name: {{ .Values.name }}
+  taskManager:
+    replicas: {{ .Values.taskManager.replicas }}
+    resource:
+      memory: {{ .Values.taskManager.memorySize }}
+      cpu: {{ .Values.taskManager.cpu }}
+    podTemplate:
+      spec:
+        containers:
+          - name: flink-main-container
+            envFrom:
+              - configMapRef:
+                  name: {{ .Values.name }}
+  job:
+    jarURI: local:///opt/flink/usrlib/flink-sessionizer.jar
+    upgradeMode: savepoint
+    state: {{ .Values.job.state }}
+    allowNonRestoredState: {{ .Values.job.allowNonRestoredState }}
+    initialSavepointPath: {{ .Values.job.initialSavepointPath }}
+    # Any change to this value will trigger manual savepoint
+    savepointTriggerNonce: 0
+  logConfiguration:
+    "log4j-console.properties": |
+      {{ .Files.Get "log4j-console.properties" | nindent 6 }}

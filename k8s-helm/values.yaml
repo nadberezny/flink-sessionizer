@@ -1,0 +1,54 @@
+name: flink-sessionizer
+jobName: flink-sessionizer
+env: prod
+
+image:
+  pullPolicy: Always
+  repository: nadberezny/flink-sessionizer
+  tag: latest
+
+job:
+  flinkVersion: v1_20
+  state: running
+  rest:
+    flamegraph:
+      enabled: false
+  allowNonRestoredState: false
+  initialSavepointPath: ""
+
+
+serviceAccount: flink
+
+kafka:
+  bootstrapServers: "strimzi-kafka-kafka-bootstrap.cluster-services.svc.cluster.local:9092"
+  inputTopic: "input"
+
+sessionProcessor:
+  maxSessionLookback: "P30D"
+  sessionsCacheTTL: "P31D"
+
+outOfOrderness:
+  watermarkAlignmentMaxDrift: "PT30M"
+  watermarkAlignmentUpdateInterval: "PT10S"
+
+checkpointing:
+  interval: "60 s"
+  minPause: "50 s"
+  timeout: "30 min"
+  fileMerging:
+    enabled: false
+
+execution:
+  bufferTimeout: "100 ms"
+  autoWatermarkInterval: "500 ms"
+  maxParallelism: 24
+
+jobManager:
+  cpu: 0.2
+  memorySize: "1g"
+
+taskManager:
+  replicas: 1
+  numberOfTaskSlots: 2
+  cpu: 1
+  memorySize: "1g"
