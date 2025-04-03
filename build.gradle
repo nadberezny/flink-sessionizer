@@ -11,6 +11,7 @@ version = '0.1-SNAPSHOT'
 mainClassName = 'org.quickstart.DataStreamJob'
 description = """Flink Quickstart Job"""
 ext {
+    targetDockerImageName = 'nadberezny/flink-sessionizer'
     kafkaVersion = '3.9.0'
     flinkVersion = '1.20.1'
     scalaBinaryVersion = '_2.12'
@@ -113,3 +114,12 @@ shadowJar {
 test {
     useJUnitPlatform()
 }
+
+tasks.register('dockerBuildxAndPushImage', Exec) {
+    String dockerTag
+
+    dockerTag = project.hasProperty("dockerTag") ? project.getProperty("dockerTag") : "git rev-parse HEAD".execute().text.trim()
+
+    commandLine 'docker', 'buildx', 'build', '--platform', 'linux/amd64,linux/arm64', '-t', "$targetDockerImageName:$dockerTag", '--push', '.'
+}
+dockerBuildxAndPushImage.dependsOn(shadowJar)
