@@ -13,7 +13,7 @@ public final class Session {
 
     private String id;
     private long timestamp;
-    private Key key;
+    private Key userId;
     private long windowFrom;
     private long windowTo;
     private int pageViewCount;

@@ -14,6 +14,8 @@ import java.util.List;
 @AllArgsConstructor
 public class OrderWithSessions {
 
+    private Key userId;
+
     private Order order;
 
     @TypeInfo(SessionsTypeInfoFactory.class)

@@ -44,7 +44,7 @@ public class Main {
                 .aggregate(new SessionElementsAggregateFunction(config.getSessionInactivityGap().toMillis()));
 
         SingleOutputStreamOperator<Session> enrichedSessions = sessions
-                .keyBy(Session::getKey)
+                .keyBy(Session::getUserId)
                 .process(new SessionProcessor());
 
         SideOutputDataStream<OrderWithSessions> orderWithSessions = enrichedSessions
