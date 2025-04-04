@@ -1,10 +1,11 @@
 package com.getindata.flink.sessionizer;
 
 import com.getindata.flink.sessionizer.config.JobConfig;
-import com.getindata.flink.sessionizer.model.OrderWithSessions;
 import com.getindata.flink.sessionizer.serde.input.Event;
 import com.getindata.flink.sessionizer.serde.kafka.JsonSerializer;
-import com.getindata.flink.sessionizer.serde.kafka.OrderWithSessionsDeserializer;
+import com.getindata.flink.sessionizer.serde.kafka.OrderWithAttributedSessionsDeserializer;
+import com.getindata.flink.sessionizer.serde.output.OrderWithAttributedSessions;
+import com.getindata.flink.sessionizer.service.DummyAttributionService;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.flink.configuration.Configuration;
@@ -72,7 +73,7 @@ public class IntegrationTestExtension implements BeforeAllCallback, AfterAllCall
 
     private KafkaProducer<String, Event> eventProducer;
     
-    private KafkaConsumer<String, OrderWithSessions> orderWithSessionsConsumer;
+    private KafkaConsumer<String, OrderWithAttributedSessions> orderWithSessionsConsumer;
 
     private StreamExecutionEnvironment env;
 
@@ -116,7 +117,7 @@ public class IntegrationTestExtension implements BeforeAllCallback, AfterAllCall
                 GROUP_ID_CONFIG, randomUUID().toString(),
                 AUTO_OFFSET_RESET_CONFIG, "earliest",
                 KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName(),
-                VALUE_DESERIALIZER_CLASS_CONFIG, OrderWithSessionsDeserializer.class.getName()
+                VALUE_DESERIALIZER_CLASS_CONFIG, OrderWithAttributedSessionsDeserializer.class.getName()
         ));
         orderWithSessionsConsumer.subscribe(List.of(outputTopic));
         var jobConfig = new JobConfig(
@@ -125,7 +126,7 @@ public class IntegrationTestExtension implements BeforeAllCallback, AfterAllCall
         env = StreamExecutionEnvironment.getExecutionEnvironment();
         env.setParallelism(2);
         setupCheckpointing(env);
-        Main.build(jobConfig, env);
+        Main.build(jobConfig, env, new DummyAttributionService());
         env.executeAsync();
     }
 
@@ -148,5 +149,5 @@ public class IntegrationTestExtension implements BeforeAllCallback, AfterAllCall
     }
     
     public record IntegrationTextCtx(KafkaProducer<String, Event> eventProducer,
-                                     KafkaConsumer<String, OrderWithSessions> orderWithSessionsConsumer) {}
+                                     KafkaConsumer<String, OrderWithAttributedSessions> orderWithSessionsConsumer) {}
 }

@@ -11,7 +11,6 @@ import org.apache.flink.api.common.state.StateTtlConfig;
 import org.apache.flink.configuration.Configuration;
 import org.apache.flink.streaming.api.functions.KeyedProcessFunction;
 import org.apache.flink.util.Collector;
-import org.apache.flink.util.OutputTag;
 
 import java.time.Duration;
 import java.util.Comparator;
@@ -24,7 +23,7 @@ import java.util.stream.Stream;
 import static java.util.stream.StreamSupport.stream;
 
 @Slf4j
-public class SessionProcessor extends KeyedProcessFunction<Key, Session, Session> {
+public class SessionProcessor extends KeyedProcessFunction<Key, Session, OrderWithSessions> {
 
     private final Duration sessionStateTTL = Duration.ofDays(31);
 
@@ -34,14 +33,11 @@ public class SessionProcessor extends KeyedProcessFunction<Key, Session, Session
 
     private static final MapStateDescriptor<String, Session> SESSIONS_CACHE_STATE_DESCRIPTOR = new MapStateDescriptor<>(SESSIONS_CACHE_STATE, String.class, Session.class);
 
-    public static final OutputTag<OrderWithSessions> orderWithSessionsOutputTag = new OutputTag<>("order-with-sessions") {
-    };
-
     private MapState<String, Session> sessionsCacheState;
 
 
     @Override
-    public void open(Configuration parameters) throws Exception {
+    public void open(Configuration parameters) {
         SESSIONS_CACHE_STATE_DESCRIPTOR.enableTimeToLive(
                 StateTtlConfig
                         .newBuilder(sessionStateTTL)
@@ -54,16 +50,12 @@ public class SessionProcessor extends KeyedProcessFunction<Key, Session, Session
     }
 
     @Override
-    public void processElement(Session session, KeyedProcessFunction<Key, Session, Session>.Context ctx, Collector<Session> out) throws Exception {
+    public void processElement(Session session, KeyedProcessFunction<Key, Session, OrderWithSessions>.Context ctx, Collector<OrderWithSessions> out) throws Exception {
         if (session.getLastEvent().getOrder() != null) {
             var orderWithSessions = getOrderWithSession(ctx.getCurrentKey(), session.getLastEvent().getOrder());
-            ctx.output(
-                    orderWithSessionsOutputTag,
-                    orderWithSessions
-            );
+            out.collect(orderWithSessions);
         } else {
             add(session);
-            out.collect(session);
         }
     }
 
