@@ -96,7 +96,7 @@ public class SessionProcessor extends KeyedProcessFunction<Key, Session, Session
         var sessions = getSessionsByMaxLookback(order.getTimestamp() - maxSessionLookback.toMillis());
         removeSessionsFromCache();
 
-        return new OrderWithSessions(userId, order, sessions);
+        return new OrderWithSessions(userId, order.getTimestamp(), order, sessions);
     }
 
     public void add(Session session) throws Exception {

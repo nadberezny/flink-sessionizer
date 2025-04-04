@@ -1,7 +1,7 @@
 package com.getindata.flink.sessionizer.model;
 
 import com.getindata.flink.sessionizer.model.event.Order;
-import com.getindata.flink.sessionizer.typing.SessionsTypeInfoFactory;
+import com.getindata.flink.sessionizer.typing.AttributedSessionsTypeInfoFactory;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -12,7 +12,7 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class OrderWithSessions {
+public class OrderWithAttributedSessions {
 
     private Key userId;
 
@@ -20,6 +20,6 @@ public class OrderWithSessions {
 
     private Order order;
 
-    @TypeInfo(SessionsTypeInfoFactory.class)
-    private List<Session> sessions;
+    @TypeInfo(AttributedSessionsTypeInfoFactory.class)
+    private List<AttributedSession> sessions;
 }

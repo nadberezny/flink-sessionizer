@@ -35,7 +35,8 @@ public class Main {
         KafkaSink<OrderWithSessions> orderWithSessionsSink = KafkaJsonSinkFactory.create(
                 config.getBootStrapServers(),
                 config.getOutputTopic(),
-                (KeySelector<OrderWithSessions, String>) orderWithSessions -> orderWithSessions.getOrder().getId()
+                (KeySelector<OrderWithSessions, String>) orderWithSessions -> orderWithSessions.getOrder().getId(),
+                OrderWithSessions::getTimestamp
         );
 
         SingleOutputStreamOperator<Session> sessions = events

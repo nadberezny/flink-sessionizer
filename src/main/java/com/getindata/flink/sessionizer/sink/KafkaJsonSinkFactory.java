@@ -6,6 +6,7 @@ import org.apache.flink.api.java.functions.KeySelector;
 import org.apache.flink.connector.base.DeliveryGuarantee;
 import org.apache.flink.connector.kafka.sink.KafkaRecordSerializationSchema;
 import org.apache.flink.connector.kafka.sink.KafkaSink;
+import org.apache.flink.util.function.SerializableFunction;
 import org.apache.kafka.clients.producer.ProducerRecord;
 
 import java.io.Serializable;
@@ -26,11 +27,11 @@ public class KafkaJsonSinkFactory {
     public static <V> KafkaSink<V> create(
             String bootstrapServers,
             String topic,
-            KeySelector<V, String> keySelector
-    ) {
+            KeySelector<V, String> keySelector,
+            SerializableFunction<V, Long> timestampProvider) {
         return KafkaSink.<V>builder()
                 .setBootstrapServers(bootstrapServers)
-                .setRecordSerializer(new SerializationSchema<>(topic, keySelector))
+                .setRecordSerializer(new SerializationSchema<>(topic, keySelector, timestampProvider))
                 .setDeliveryGuarantee(DeliveryGuarantee.AT_LEAST_ONCE)
                 .build();
     }
@@ -39,19 +40,21 @@ public class KafkaJsonSinkFactory {
 
         private final KeySelector<V, String> keySelector;
         private final String topic;
+        private final SerializableFunction<V, Long> timestampProvider;
 
-        SerializationSchema(String topic, KeySelector<V, String> keySelector) {
+        SerializationSchema(String topic, KeySelector<V, String> keySelector, SerializableFunction<V, Long> timestampProvider) {
             this.topic = topic;
             this.keySelector = keySelector;
+            this.timestampProvider = timestampProvider;
         }
 
         @Override
-        public ProducerRecord<byte[], byte[]> serialize(V element, KafkaSinkContext context, Long timestamp) {
+        public ProducerRecord<byte[], byte[]> serialize(V element, KafkaSinkContext context, Long ignoredTimestamp) {
             try {
                 return new ProducerRecord<>(
                         topic,
                         null,
-                        timestamp == null || timestamp < 0L ? null : timestamp,
+                        timestampProvider.apply(element),
                         keySelector.getKey(element).getBytes(StandardCharsets.UTF_8),
                         MAPPER.writeValueAsBytes(element)
                 );
