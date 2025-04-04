@@ -1,14 +1,16 @@
 resource "kubernetes_job" "liquibase" {
   depends_on = [
-    helm_release.clickhouse_cluster
+    helm_release.clickhouse_cluster,
   ]
 
   metadata {
-    name = "liquibase-job"
+    name      = "liquibase-job"
     namespace = local.namespace_services
   }
 
   spec {
+    ttl_seconds_after_finished = "20"
+
     template {
       metadata {
         labels = {
@@ -18,13 +20,13 @@ resource "kubernetes_job" "liquibase" {
 
       spec {
         container {
-          name  = "liquibase"
-          image = "nadberezny/flink-sessionizer-liquibase:latest-arm"
+          name              = "liquibase"
+          image             = "nadberezny/flink-sessionizer-liquibase:latest-arm"
           image_pull_policy = "Always"
 
           env {
             name  = "CLICKHOUSE_JDBC_CONNECTION_URL"
-            value = "jdbc:clickhouse://chi-clickhouse-cluster-default-0-0-0.chi-clickhouse-cluster-default-0-0.cluster-services.svc.cluster.local:8123"
+            value = "jdbc:clickhouse://chi-clickhouse-cluster-default-0-0.cluster-services.svc.cluster.local:8123"
           }
 
           resources {
@@ -37,6 +39,6 @@ resource "kubernetes_job" "liquibase" {
         restart_policy = "Never"
       }
     }
-    backoff_limit = 0
+    backoff_limit = 90
   }
 }

@@ -8,4 +8,6 @@ resource "helm_release" "flink_operator" {
   depends_on = [
     module.k3d_cluster, helm_release.cert-manager
   ]
+
+  timeout = 1500
 }

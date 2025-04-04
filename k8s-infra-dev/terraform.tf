@@ -2,7 +2,7 @@ terraform {
   required_providers {
     kubernetes = {
       source  = "hashicorp/kubernetes"
-      version = "2.19.0"
+      version = ">= 2.36.0"
     }
     kubectl = {
       source  = "gavinbunney/kubectl"
@@ -10,7 +10,7 @@ terraform {
     }
     helm = {
       source  = "hashicorp/helm"
-      version = ">= 2.9.0"
+      version = ">= 2.17.0"
     }
     minio = {
       version = "1.13.0"

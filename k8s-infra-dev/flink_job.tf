@@ -4,6 +4,8 @@ resource "helm_release" "flink_job" {
   namespace        = local.namespace_applications
   create_namespace = true
 
+  timeout = 1500
+
   values = [
     file("../k8s-helm/flink/values.yaml")
   ]
