@@ -9,7 +9,7 @@ resource "kubernetes_job" "liquibase" {
   }
 
   spec {
-    ttl_seconds_after_finished = "20"
+    ttl_seconds_after_finished = "360"
 
     template {
       metadata {
@@ -54,6 +54,6 @@ resource "kubernetes_job" "liquibase" {
         restart_policy = "Never"
       }
     }
-    backoff_limit = 90
+    backoff_limit = 190
   }
 }
