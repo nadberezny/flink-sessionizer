@@ -13,19 +13,19 @@ public class MapToAttributedOrderJson implements MapFunction<OrderWithAttributed
 
     @Override
     public AttributedOrderJson map(OrderWithAttributedSessions ows) throws Exception {
-        Optional<Session> lastSession = getLastSession(ows);
-        String sessionId = lastSession.map(Session::getId).orElse(UUID.randomUUID().toString());
-        int pageViewCount = lastSession.map(Session::getPageViewCount).orElse(0);
-        int durationMillis = lastSession.map(Session::getDurationMillis).orElse(0L).intValue();
+        Optional<AttributedSession> lastSession = getLastSession(ows);
+        String sessionId = lastSession.map(AttributedSession::getSession).map(Session::getId).orElse(UUID.randomUUID().toString());
+        int pageViewCount = lastSession.map(AttributedSession::getSession).map(Session::getPageViewCount).orElse(0);
+        int durationMillis = lastSession.map(AttributedSession::getSession).map(Session::getDurationMillis).orElse(0L).intValue();
+        int weight = lastSession.map(AttributedSession::getWeight).orElse(0f).intValue();
 
         return new AttributedOrderJson(
-                ows.getOrder().getId(), sessionId, ows.getUserId().getValue(), ows.getTimestamp(), pageViewCount, durationMillis
+                ows.getOrder().getId(), sessionId, ows.getUserId().getValue(), ows.getTimestamp(), pageViewCount, durationMillis, weight
         );
     }
 
-    private Optional<Session> getLastSession(OrderWithAttributedSessions ows) {
+    private Optional<AttributedSession> getLastSession(OrderWithAttributedSessions ows) {
         return ows.getSessions().stream()
-                .reduce((first, second) -> second) // Finds the last element
-                .map(AttributedSession::getSession);
+                .reduce((first, second) -> second); // Finds the last element
     }
 }

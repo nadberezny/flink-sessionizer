@@ -5,5 +5,6 @@ public record AttributedOrderJson(String orderId,
                                   String userId,
                                   long timestamp,
                                   int pageViewCount,
-                                  int durationMillis) {
+                                  int durationMillis,
+                                  int weight) {
 }
