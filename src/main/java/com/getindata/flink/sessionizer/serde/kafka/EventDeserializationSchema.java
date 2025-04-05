@@ -1,8 +1,9 @@
 package com.getindata.flink.sessionizer.serde.kafka;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.getindata.flink.sessionizer.function.InputToEventMap;
-import com.getindata.flink.sessionizer.model.Event;
+import com.getindata.flink.sessionizer.function.MapToClickStreamEvent;
+import com.getindata.flink.sessionizer.model.ClickStreamEvent;
+import com.getindata.flink.sessionizer.serde.input.ClickStreamEventJson;
 import org.apache.flink.api.common.typeinfo.TypeInformation;
 import org.apache.flink.api.common.typeinfo.Types;
 import org.apache.flink.connector.kafka.source.reader.deserializer.KafkaRecordDeserializationSchema;
@@ -11,20 +12,20 @@ import org.apache.kafka.clients.consumer.ConsumerRecord;
 
 import java.io.IOException;
 
-public class EventDeserializationSchema implements KafkaRecordDeserializationSchema<Event> {
+public class EventDeserializationSchema implements KafkaRecordDeserializationSchema<ClickStreamEvent> {
 
-    private final InputToEventMap inputToEventMap = new InputToEventMap();
+    private final MapToClickStreamEvent mapToClickStreamEvent = new MapToClickStreamEvent();
 
     @Override
-    public void deserialize(ConsumerRecord<byte[], byte[]> consumerRecord, Collector<Event> collector) throws IOException {
+    public void deserialize(ConsumerRecord<byte[], byte[]> consumerRecord, Collector<ClickStreamEvent> collector) throws IOException {
         var input = new ObjectMapper()
-                .readValue(consumerRecord.value(), com.getindata.flink.sessionizer.serde.input.Event.class);
+                .readValue(consumerRecord.value(), ClickStreamEventJson.class);
 
-        collector.collect(inputToEventMap.map(input));
+        collector.collect(mapToClickStreamEvent.map(input));
     }
 
     @Override
-    public TypeInformation<Event> getProducedType() {
-        return Types.POJO(Event.class);
+    public TypeInformation<ClickStreamEvent> getProducedType() {
+        return Types.POJO(ClickStreamEvent.class);
     }
 }

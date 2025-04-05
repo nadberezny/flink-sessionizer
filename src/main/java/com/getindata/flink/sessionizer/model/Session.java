@@ -20,7 +20,7 @@ public final class Session {
     private long durationMillis;
     private MarketingChannel marketingChannel;
     private String landingPage;
-    private Event lastEvent;
+    private ClickStreamEvent lastEvent;
 
     public Session merge(Session other) {
         this.durationMillis = (this.durationMillis + other.durationMillis);

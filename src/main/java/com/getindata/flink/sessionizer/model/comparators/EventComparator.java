@@ -1,18 +1,18 @@
 package com.getindata.flink.sessionizer.model.comparators;
 
-import com.getindata.flink.sessionizer.model.Event;
+import com.getindata.flink.sessionizer.model.ClickStreamEvent;
 
 import java.util.Comparator;
 
-public class EventComparator implements Comparator<Event> {
+public class EventComparator implements Comparator<ClickStreamEvent> {
     @Override
-    public int compare(Event o1, Event o2) {
-        return Comparator.comparingLong(Event::getTimestamp)
+    public int compare(ClickStreamEvent o1, ClickStreamEvent o2) {
+        return Comparator.comparingLong(ClickStreamEvent::getTimestamp)
                 .thenComparing(eventTypeComparator())
                 .compare(o1, o2);
     }
 
-    private Comparator<Event> eventTypeComparator() {
+    private Comparator<ClickStreamEvent> eventTypeComparator() {
         return (o1, o2) -> {
             if (o1.getType().equals(o2.getType())) {
                 return 0;

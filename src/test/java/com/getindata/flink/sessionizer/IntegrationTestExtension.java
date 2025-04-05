@@ -1,10 +1,10 @@
 package com.getindata.flink.sessionizer;
 
 import com.getindata.flink.sessionizer.config.JobConfig;
-import com.getindata.flink.sessionizer.serde.input.Event;
+import com.getindata.flink.sessionizer.serde.input.ClickStreamEventJson;
 import com.getindata.flink.sessionizer.serde.kafka.JsonSerializer;
 import com.getindata.flink.sessionizer.serde.kafka.OrderWithAttributedSessionsDeserializer;
-import com.getindata.flink.sessionizer.serde.output.OrderWithAttributedSessions;
+import com.getindata.flink.sessionizer.serde.output.AttributedOrderJson;
 import com.getindata.flink.sessionizer.service.DummyAttributionService;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -52,8 +52,9 @@ import static org.apache.kafka.clients.consumer.ConsumerConfig.VALUE_DESERIALIZE
 @Slf4j
 public class IntegrationTestExtension implements BeforeAllCallback, AfterAllCallback, BeforeEachCallback, AfterEachCallback, ParameterResolver {
 
-    public static final String inputTopic = "input";
-    public static final String outputTopic = "output";
+    public static final String clickStreamTopic = "click-stream";
+    public static final String sessionsTopic = "sessions";
+    public static final String attributedOrdersTopic = "attributed-orders";
 
     @RegisterExtension
     public static final MiniClusterExtension flinkCluster = new MiniClusterExtension(
@@ -71,9 +72,9 @@ public class IntegrationTestExtension implements BeforeAllCallback, AfterAllCall
 
     private AdminClient kafkaAdmin;
 
-    private KafkaProducer<String, Event> eventProducer;
+    private KafkaProducer<String, ClickStreamEventJson> eventProducer;
     
-    private KafkaConsumer<String, OrderWithAttributedSessions> orderWithSessionsConsumer;
+    private KafkaConsumer<String, AttributedOrderJson> orderWithSessionsConsumer;
 
     private StreamExecutionEnvironment env;
 
@@ -101,7 +102,11 @@ public class IntegrationTestExtension implements BeforeAllCallback, AfterAllCall
     public void beforeAll(ExtensionContext extensionContext) throws Exception {
         redpanda.start();
         kafkaAdmin = AdminClient.create(Map.of(BOOTSTRAP_SERVERS_CONFIG, redpanda.getBootstrapServers()));
-        kafkaAdmin.createTopics(List.of(new NewTopic(inputTopic, Optional.empty(), Optional.empty())));
+        kafkaAdmin.createTopics(List.of(
+                new NewTopic(clickStreamTopic, Optional.empty(), Optional.empty()),
+                new NewTopic(sessionsTopic, Optional.empty(), Optional.empty()),
+                new NewTopic(attributedOrdersTopic, Optional.empty(), Optional.empty())
+        ));
     }
 
     @Override
@@ -119,9 +124,9 @@ public class IntegrationTestExtension implements BeforeAllCallback, AfterAllCall
                 KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName(),
                 VALUE_DESERIALIZER_CLASS_CONFIG, OrderWithAttributedSessionsDeserializer.class.getName()
         ));
-        orderWithSessionsConsumer.subscribe(List.of(outputTopic));
+        orderWithSessionsConsumer.subscribe(List.of(attributedOrdersTopic));
         var jobConfig = new JobConfig(
-                redpanda.getBootstrapServers(), inputTopic, outputTopic, Duration.ofMinutes(30)
+                redpanda.getBootstrapServers(), clickStreamTopic, sessionsTopic, attributedOrdersTopic, Duration.ofMinutes(30)
         );
         env = StreamExecutionEnvironment.getExecutionEnvironment();
         env.setParallelism(2);
@@ -148,6 +153,6 @@ public class IntegrationTestExtension implements BeforeAllCallback, AfterAllCall
         env.getCheckpointConfig().setCheckpointStorage("file://" + checkpointDir.getAbsolutePath());
     }
     
-    public record IntegrationTextCtx(KafkaProducer<String, Event> eventProducer,
-                                     KafkaConsumer<String, OrderWithAttributedSessions> orderWithSessionsConsumer) {}
+    public record IntegrationTextCtx(KafkaProducer<String, ClickStreamEventJson> eventProducer,
+                                     KafkaConsumer<String, AttributedOrderJson> orderWithSessionsConsumer) {}
 }

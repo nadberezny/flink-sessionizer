@@ -1,6 +1,6 @@
 package com.getindata.flink.sessionizer.sessionwindow;
 
-import com.getindata.flink.sessionizer.model.Event;
+import com.getindata.flink.sessionizer.model.ClickStreamEvent;
 import com.getindata.flink.sessionizer.model.event.PageView;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.flink.api.common.ExecutionConfig;
@@ -19,7 +19,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Slf4j
-public class SessionElementWindowAssigner extends MergingWindowAssigner<Event, SessionTimeWindow> {
+public class SessionElementWindowAssigner extends MergingWindowAssigner<ClickStreamEvent, SessionTimeWindow> {
     private final long sessionTimeout;
     private final TypeSerializer<SessionTimeWindow> serializer;
 
@@ -63,7 +63,7 @@ public class SessionElementWindowAssigner extends MergingWindowAssigner<Event, S
     }
 
     @Override
-    public Collection<SessionTimeWindow> assignWindows(Event input, long timestamp, WindowAssignerContext context) {
+    public Collection<SessionTimeWindow> assignWindows(ClickStreamEvent input, long timestamp, WindowAssignerContext context) {
         var event = input; // type casting to avoid type change of window which is incompatible change
         long evTimestamp = event.getTimestamp();
         List<SessionTimeWindow> sessionTimeWindows;
@@ -78,7 +78,7 @@ public class SessionElementWindowAssigner extends MergingWindowAssigner<Event, S
     }
 
     @Override
-    public Trigger<Event, SessionTimeWindow> getDefaultTrigger(StreamExecutionEnvironment env) {
+    public Trigger<ClickStreamEvent, SessionTimeWindow> getDefaultTrigger(StreamExecutionEnvironment env) {
         return new OnEventFireTrigger<>();
     }
 

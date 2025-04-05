@@ -1,6 +1,6 @@
 package com.getindata.flink.sessionizer.sessionwindow;
 
-import com.getindata.flink.sessionizer.model.Event;
+import com.getindata.flink.sessionizer.model.ClickStreamEvent;
 import com.getindata.flink.sessionizer.typing.EventListTypeInfoFactory;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -16,20 +16,20 @@ import java.util.Optional;
 @NoArgsConstructor
 @AllArgsConstructor
 public class SessionWindowAccumulator implements Serializable {
-    // Should only keep first, secondLast and last Event
+    // Should only keep first, secondLast and last ClickStreamEvent
     @TypeInfo(EventListTypeInfoFactory.class)
-    private List<Event> events = new ArrayList<>();
+    private List<ClickStreamEvent> events = new ArrayList<>();
     private int pageViewsCount;
 
-    public Event firstEvent() {
+    public ClickStreamEvent firstEvent() {
         return events.get(0);
     }
 
-    public Event lastEvent() {
+    public ClickStreamEvent lastEvent() {
         return events.get(events.size() - 1) ;
     }
 
-    public Optional<Event> secondLastEvent() {
+    public Optional<ClickStreamEvent> secondLastEvent() {
         return events.size() >= 2 ? Optional.ofNullable(events.get(events.size() - 2)) : Optional.empty();
     }
 }

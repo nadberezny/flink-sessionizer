@@ -1,6 +1,6 @@
 package com.getindata.flink.sessionizer;
 
-import com.getindata.flink.sessionizer.serde.input.Event;
+import com.getindata.flink.sessionizer.serde.input.ClickStreamEventJson;
 import com.getindata.flink.sessionizer.serde.input.Order;
 import com.getindata.flink.sessionizer.serde.input.PageView;
 import org.apache.kafka.clients.producer.ProducerRecord;
@@ -11,7 +11,7 @@ import java.math.BigInteger;
 import java.time.Duration;
 import java.time.Instant;
 
-import static com.getindata.flink.sessionizer.IntegrationTestExtension.inputTopic;
+import static com.getindata.flink.sessionizer.IntegrationTestExtension.clickStreamTopic;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.given;
 
@@ -26,23 +26,23 @@ public class MainIntegrationTest {
         var user1 = "user1";
         var t1 = Instant.parse("2025-04-09T00:00:00Z");
         var t2 = Instant.parse("2025-04-09T01:00:00Z");
-        var pv1 = new Event(
+        var pv1 = new ClickStreamEventJson(
                 new PageView(user1, null, "https://mystore.com", "channel1", null, null, null, null, null, "ip1", null),
                 null, key1, "pageview", "frontend1", "n/a", "n/a", t1.toString()
         );
-//        var pv2 = new Event(
+//        var pv2 = new ClickStreamEvent(
 //                new PageView(user1, null, null, null, null, null, null, null, null, null, null),
 //                null, key1, null, null, null, null, t1.toString()
 //        );
-        var order1 = new Event(null, new Order(user1, "order1", null, null, null, BigInteger.valueOf(100), null, null, null, null, null, null, null, null),
+        var order1 = new ClickStreamEventJson(null, new Order(user1, "order1", null, null, null, BigInteger.valueOf(100), null, null, null, null, null, null, null, null),
                 key1, "order", "frontend1", "n/a", "n/a", t2.toString());
 
         // when
         ctx.eventProducer().send(
-                new ProducerRecord<>(inputTopic, pv1)
+                new ProducerRecord<>(clickStreamTopic, pv1)
         );
         ctx.eventProducer().send(
-                new ProducerRecord<>(inputTopic, order1)
+                new ProducerRecord<>(clickStreamTopic, order1)
         );
 
         // then

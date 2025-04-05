@@ -11,15 +11,17 @@ import java.time.Duration;
 public class JobConfig {
 
     private final String bootStrapServers;
-    private final String inputTopic;
-    private final String outputTopic;
+    private final String clickStreamTopic;
+    private final String sessionsTopic;
+    private final String attributedOrdersTopic;
     private final Duration sessionInactivityGap;
 
     public JobConfig(Config config) {
         var jobConfig = config.getConfig("job");
         bootStrapServers = jobConfig.getString("bootStrapServers");
-        inputTopic = jobConfig.getString("inputTopic");
-        outputTopic = jobConfig.getString("outputTopic");
+        clickStreamTopic = jobConfig.getString("clickStreamTopic");
+        sessionsTopic = jobConfig.getString("sessionsTopic");
+        attributedOrdersTopic = jobConfig.getString("attributedOrdersTopic");
         sessionInactivityGap = Duration.parse(jobConfig.getString("sessionInactivityGap"));
     }
 }

@@ -1,6 +1,6 @@
 package com.getindata.flink.sessionizer.function;
 
-import com.getindata.flink.sessionizer.model.Event;
+import com.getindata.flink.sessionizer.model.ClickStreamEvent;
 import com.getindata.flink.sessionizer.model.Session;
 import com.getindata.flink.sessionizer.model.comparators.EventComparator;
 import com.getindata.flink.sessionizer.model.event.PageView;
@@ -16,9 +16,9 @@ import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @Slf4j
-public class SessionElementsAggregateFunction implements AggregateFunction<Event, SessionWindowAccumulator, Session> {
+public class SessionElementsAggregateFunction implements AggregateFunction<ClickStreamEvent, SessionWindowAccumulator, Session> {
 
-    private static final Comparator<Event> EVENT_COMPARATOR = new EventComparator();
+    private static final Comparator<ClickStreamEvent> EVENT_COMPARATOR = new EventComparator();
 
     private final long sessionTimeout;
 
@@ -28,9 +28,9 @@ public class SessionElementsAggregateFunction implements AggregateFunction<Event
     }
 
     @Override
-    public SessionWindowAccumulator add(Event event, SessionWindowAccumulator accumulator) {
+    public SessionWindowAccumulator add(ClickStreamEvent event, SessionWindowAccumulator accumulator) {
         log.trace("Adding event {} to accumulator {}", event, accumulator);
-        List<Event> events = accumulator.getEvents();
+        List<ClickStreamEvent> events = accumulator.getEvents();
         events.add(event);
         events = events.stream().sorted(EVENT_COMPARATOR).collect(Collectors.toList());
         if (events.size() > 3) {
@@ -47,7 +47,7 @@ public class SessionElementsAggregateFunction implements AggregateFunction<Event
     public Session getResult(SessionWindowAccumulator accumulator) {
         log.trace("Creating SessionEvent from accumulator {}", accumulator);
         try {
-            Event lastEvent = accumulator.lastEvent();
+            ClickStreamEvent lastEvent = accumulator.lastEvent();
             Session.SessionBuilder sessionBuilder = Session.builder();
             sessionBuilder
                     .withTimestamp(lastEvent.getTimestamp())
@@ -75,7 +75,7 @@ public class SessionElementsAggregateFunction implements AggregateFunction<Event
             }
             return sessionBuilder.build();
         } catch (RuntimeException e) {
-            log.error("Failed to create Session out of {}", accumulator);
+            log.error("Failed to create SessionJson out of {}", accumulator);
             throw e;
         }
     }
@@ -83,12 +83,12 @@ public class SessionElementsAggregateFunction implements AggregateFunction<Event
     @Override
     public SessionWindowAccumulator merge(SessionWindowAccumulator a, SessionWindowAccumulator b) {
         log.trace("merging window accumulators {} and {}", a, b);
-        List<Event> events = a.getEvents();
+        List<ClickStreamEvent> events = a.getEvents();
         events.addAll(b.getEvents());
         events = events.stream().sorted(EVENT_COMPARATOR).collect(Collectors.toList());
 
         if (events.size() > 3) {
-            ArrayList<Event> result = new ArrayList<>();
+            ArrayList<ClickStreamEvent> result = new ArrayList<>();
             result.add(events.get(0));
             result.addAll(events.subList(events.size() - 2, events.size()));
             a.setEvents(result);

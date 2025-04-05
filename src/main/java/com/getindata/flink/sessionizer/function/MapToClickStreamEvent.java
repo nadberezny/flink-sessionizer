@@ -1,10 +1,11 @@
 package com.getindata.flink.sessionizer.function;
 
-import com.getindata.flink.sessionizer.model.Event;
+import com.getindata.flink.sessionizer.model.ClickStreamEvent;
 import com.getindata.flink.sessionizer.model.Key;
 import com.getindata.flink.sessionizer.model.MarketingChannel;
 import com.getindata.flink.sessionizer.model.event.Order;
 import com.getindata.flink.sessionizer.model.event.PageView;
+import com.getindata.flink.sessionizer.serde.input.ClickStreamEventJson;
 import com.getindata.flink.sessionizer.util.HashingUtility;
 import org.apache.flink.api.common.functions.MapFunction;
 
@@ -12,10 +13,10 @@ import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
-public class InputToEventMap implements MapFunction<com.getindata.flink.sessionizer.serde.input.Event, Event> {
+public class MapToClickStreamEvent implements MapFunction<ClickStreamEventJson, ClickStreamEvent> {
 
     @Override
-    public Event map(com.getindata.flink.sessionizer.serde.input.Event input) {
+    public ClickStreamEvent map(ClickStreamEventJson input) {
         long timestamp = Instant.parse(input.createdAt()).toEpochMilli();
 
         PageView pageView;
@@ -39,7 +40,7 @@ public class InputToEventMap implements MapFunction<com.getindata.flink.sessioni
             order = null;
         }
 
-        return new Event(
+        return new ClickStreamEvent(
                 Instant.parse(input.createdAt()).toEpochMilli(),
                 "UTC",
                 new Key(input.key()),

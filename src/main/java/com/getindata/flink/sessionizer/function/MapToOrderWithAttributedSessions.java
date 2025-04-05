@@ -7,13 +7,13 @@ import org.apache.flink.api.common.functions.OpenContext;
 import org.apache.flink.api.common.functions.RichMapFunction;
 import org.apache.flink.util.function.SerializableSupplier;
 
-public class AttributeOrderMap extends RichMapFunction<OrderWithSessions, OrderWithAttributedSessions> {
+public class MapToOrderWithAttributedSessions extends RichMapFunction<OrderWithSessions, OrderWithAttributedSessions> {
 
     private final SerializableSupplier<AttributionService> attributionServiceSupplier;
 
     private transient AttributionService attributionService;
 
-    public AttributeOrderMap(SerializableSupplier<AttributionService> attributionServiceSupplier) {
+    public MapToOrderWithAttributedSessions(SerializableSupplier<AttributionService> attributionServiceSupplier) {
         this.attributionServiceSupplier = attributionServiceSupplier;
     }
 
