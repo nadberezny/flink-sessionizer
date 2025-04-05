@@ -19,6 +19,8 @@ spec:
   defaults:
     templates:
       podTemplate: clickhouse-template
+      dataVolumeClaimTemplate: data-volume-template
+      logVolumeClaimTemplate: log-volume-template
   templates:
     podTemplates:
       - name: clickhouse-template
@@ -32,3 +34,18 @@ spec:
           volumes:
             - name: clickhouse-storage
               emptyDir: {}
+    volumeClaimTemplates:
+      - name: data-volume-template
+        spec:
+          accessModes:
+            - ReadWriteOnce
+          resources:
+            requests:
+              storage: 1Gi
+      - name: log-volume-template
+        spec:
+          accessModes:
+            - ReadWriteOnce
+          resources:
+            requests:
+              storage: 100Mi

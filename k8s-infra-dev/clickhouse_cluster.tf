@@ -13,6 +13,11 @@ resource "helm_release" "clickhouse_cluster" {
     helm_release.clickhouse_operator
   ]
 
+  values = [
+    <<-EOF
+    EOF
+  ]
+
   set {
     name  = "patchNonce" # Changing value effects in update when no other changes are detected
     value = 0
