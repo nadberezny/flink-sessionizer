@@ -25,6 +25,11 @@ resource "kubernetes_job" "liquibase" {
           image_pull_policy = "Always"
 
           env {
+            name  = "CLICKHOUSE_JDBC_CONNECTION_URL"
+            value = "jdbc:clickhouse://chi-clickhouse-cluster-default-0-0.cluster-services.svc.cluster.local:8123"
+          }
+
+          env {
             name  = "KAFKA_URL"
             value = local.kafka_bootstrap_server
           }
