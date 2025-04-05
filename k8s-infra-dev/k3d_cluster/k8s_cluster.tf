@@ -3,7 +3,7 @@ resource "k3d_cluster" "flink" {
 
   # See https://k3d.io/v5.4.6/usage/configfile/#config-options
   k3d_config = <<EOF
-apiVersion: k3d.io/v1alpha4
+apiVersion: k3d.io/v1alpha5
 kind: Simple
 
 # Expose ports 80 via 3080 and 443 via 8443.
