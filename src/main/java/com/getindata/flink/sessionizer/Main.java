@@ -72,6 +72,7 @@ public class Main {
                 AttributedOrderJson::timestamp);
 
         sessions
+                .filter(session -> !session.isOrder())
                 .map(new MapToSessionJson())
                 .sinkTo(sessionsSink);
 

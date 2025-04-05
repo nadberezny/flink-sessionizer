@@ -61,7 +61,7 @@ resource "helm_release" "data_gen" {
 
   set {
     name  = "deployment.env[1].value"
-    value = "input"
+    value = local.click_stream_topic
   }
 
   set {

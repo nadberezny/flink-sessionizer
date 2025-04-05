@@ -21,8 +21,9 @@ serviceAccount: flink
 
 kafka:
   bootstrapServers: "nonexisting:9092"
-  inputTopic: "input"
-  outputTopic: "output"
+  clickStreamTopic: "click-stream"
+  sessionsTopic: "sessions"
+  attributedOrdersTopic: "attributed-orders"
 
 sessionProcessor:
   maxSessionLookback: "P30D"

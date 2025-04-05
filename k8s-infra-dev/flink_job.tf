@@ -31,6 +31,21 @@ resource "helm_release" "flink_job" {
   }
 
   set {
+    name  = "kafka.clickStreamTopic"
+    value = local.click_stream_topic
+  }
+
+  set {
+    name  = "kafka.sessionsTopic"
+    value = local.sessions_topic
+  }
+
+  set {
+    name  = "kafka.attributedOrdersTopic"
+    value = local.attributed_orders_topic
+  }
+
+  set {
     name  = "s3.endpoint"
     value = "http://minio.${local.namespace_services}.svc.cluster.local:9000"
   }

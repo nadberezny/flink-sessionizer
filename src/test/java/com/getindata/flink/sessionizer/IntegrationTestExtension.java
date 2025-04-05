@@ -4,7 +4,9 @@ import com.getindata.flink.sessionizer.config.JobConfig;
 import com.getindata.flink.sessionizer.serde.input.ClickStreamEventJson;
 import com.getindata.flink.sessionizer.serde.kafka.JsonSerializer;
 import com.getindata.flink.sessionizer.serde.kafka.OrderWithAttributedSessionsDeserializer;
+import com.getindata.flink.sessionizer.serde.kafka.SessionsDeserializer;
 import com.getindata.flink.sessionizer.serde.output.AttributedOrderJson;
+import com.getindata.flink.sessionizer.serde.output.SessionJson;
 import com.getindata.flink.sessionizer.service.DummyAttributionService;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -72,7 +74,9 @@ public class IntegrationTestExtension implements BeforeAllCallback, AfterAllCall
 
     private AdminClient kafkaAdmin;
 
-    private KafkaProducer<String, ClickStreamEventJson> eventProducer;
+    private KafkaProducer<String, ClickStreamEventJson> clickStreamProducer;
+    
+    private KafkaConsumer<String, SessionJson> sessionsConsumer;
     
     private KafkaConsumer<String, AttributedOrderJson> orderWithSessionsConsumer;
 
@@ -90,8 +94,11 @@ public class IntegrationTestExtension implements BeforeAllCallback, AfterAllCall
         if (env != null) {
             env.close();
         }
-        if (eventProducer != null) {
-            eventProducer.close();
+        if (clickStreamProducer != null) {
+            clickStreamProducer.close();
+        }
+        if (sessionsConsumer != null) {
+            sessionsConsumer.close();
         }
         if (orderWithSessionsConsumer != null) {
             orderWithSessionsConsumer.close();
@@ -111,12 +118,22 @@ public class IntegrationTestExtension implements BeforeAllCallback, AfterAllCall
 
     @Override
     public void beforeEach(ExtensionContext extensionContext) throws Exception {
-        eventProducer = new KafkaProducer<>(Map.of(
+        clickStreamProducer = new KafkaProducer<>(Map.of(
                 ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, redpanda.getBootstrapServers(),
                 ProducerConfig.CLIENT_ID_CONFIG, randomUUID().toString(),
                 ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName(),
                 ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, JsonSerializer.class.getName()
         ));
+
+        sessionsConsumer = new KafkaConsumer<>(Map.of(
+                BOOTSTRAP_SERVERS_CONFIG, redpanda.getBootstrapServers(),
+                GROUP_ID_CONFIG, randomUUID().toString(),
+                AUTO_OFFSET_RESET_CONFIG, "earliest",
+                KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName(),
+                VALUE_DESERIALIZER_CLASS_CONFIG, SessionsDeserializer.class.getName()
+        ));
+        sessionsConsumer.subscribe(List.of(sessionsTopic));
+                
         orderWithSessionsConsumer = new KafkaConsumer<>(Map.of(
                 BOOTSTRAP_SERVERS_CONFIG, redpanda.getBootstrapServers(),
                 GROUP_ID_CONFIG, randomUUID().toString(),
@@ -125,6 +142,7 @@ public class IntegrationTestExtension implements BeforeAllCallback, AfterAllCall
                 VALUE_DESERIALIZER_CLASS_CONFIG, OrderWithAttributedSessionsDeserializer.class.getName()
         ));
         orderWithSessionsConsumer.subscribe(List.of(attributedOrdersTopic));
+
         var jobConfig = new JobConfig(
                 redpanda.getBootstrapServers(), clickStreamTopic, sessionsTopic, attributedOrdersTopic, Duration.ofMinutes(30)
         );
@@ -142,7 +160,7 @@ public class IntegrationTestExtension implements BeforeAllCallback, AfterAllCall
 
     @Override
     public Object resolveParameter(ParameterContext parameterContext, ExtensionContext extensionContext) throws ParameterResolutionException {
-        return new IntegrationTextCtx(eventProducer, orderWithSessionsConsumer);
+        return new IntegrationTextCtx(clickStreamProducer, sessionsConsumer, orderWithSessionsConsumer);
     }
 
     @SneakyThrows
@@ -153,6 +171,7 @@ public class IntegrationTestExtension implements BeforeAllCallback, AfterAllCall
         env.getCheckpointConfig().setCheckpointStorage("file://" + checkpointDir.getAbsolutePath());
     }
     
-    public record IntegrationTextCtx(KafkaProducer<String, ClickStreamEventJson> eventProducer,
+    public record IntegrationTextCtx(KafkaProducer<String, ClickStreamEventJson> clickStreamProducer,
+                                     KafkaConsumer<String, SessionJson> sessionsConsumer,
                                      KafkaConsumer<String, AttributedOrderJson> orderWithSessionsConsumer) {}
 }

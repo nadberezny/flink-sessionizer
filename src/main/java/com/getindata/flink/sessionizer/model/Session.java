@@ -1,5 +1,6 @@
 package com.getindata.flink.sessionizer.model;
 
+import com.getindata.flink.sessionizer.model.event.Order;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -21,6 +22,14 @@ public final class Session {
     private MarketingChannel marketingChannel;
     private String landingPage;
     private ClickStreamEvent lastEvent;
+
+    public boolean isOrder() {
+        return lastEvent.getOrder() != null;
+    }
+
+    public Order getOrder() {
+        return isOrder() ? lastEvent.getOrder() : null;
+    }
 
     public Session merge(Session other) {
         this.durationMillis = (this.durationMillis + other.durationMillis);

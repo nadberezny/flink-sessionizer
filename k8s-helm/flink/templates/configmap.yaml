@@ -9,8 +9,9 @@ data:
 
   # Kafka
   KAFKA_BOOTSTRAP_SERVERS: "{{ .Values.kafka.bootstrapServers }}"
-  KAFKA_INPUT_TOPIC: "{{ .Values.kafka.inputTopic }}"
-  KAFKA_OUTPUT_TOPIC: "{{ .Values.kafka.outputTopic }}"
+  KAFKA_CLICK_STREAM_TOPIC: "{{ .Values.kafka.clickStreamTopic }}"
+  KAFKA_SESSIONS_TOPIC: "{{ .Values.kafka.sessionsTopic }}"
+  KAFKA_ATTRIBUTED_ORDERS_TOPIC: "{{ .Values.kafka.attributedOrdersTopic }}"
 
   # Session processor
   SESSION_INACTIVITY_GAP: "{{ .Values.sessionProcessor.maxSessionLookback }}"

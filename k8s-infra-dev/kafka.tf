@@ -77,7 +77,7 @@ EOF
 
   set {
     name  = "provisioning.topics[0].name"
-    value = "input"
+    value = local.click_stream_topic
   }
   set {
     name  = "provisioning.topics[0].partitions"
@@ -86,6 +86,11 @@ EOF
 
   set {
     name  = "provisioning.topics[1].name"
-    value = "output"
+    value = local.sessions_topic
+  }
+
+  set {
+    name  = "provisioning.topics[2].name"
+    value = local.attributed_orders_topic
   }
 }

@@ -38,14 +38,20 @@ public class MainIntegrationTest {
                 key1, "order", "frontend1", "n/a", "n/a", t2.toString());
 
         // when
-        ctx.eventProducer().send(
+        ctx.clickStreamProducer().send(
                 new ProducerRecord<>(clickStreamTopic, pv1)
         );
-        ctx.eventProducer().send(
+        ctx.clickStreamProducer().send(
                 new ProducerRecord<>(clickStreamTopic, order1)
         );
 
         // then
+        given().ignoreExceptions().atMost(Duration.ofMinutes(3)).await().until(() -> {
+            var records = ctx.sessionsConsumer().poll(Duration.ofMillis(500));
+            assertThat(records).hasSize(1);
+            return true;
+        });
+
         given().ignoreExceptions().atMost(Duration.ofMinutes(3)).await().until(() -> {
             var records = ctx.orderWithSessionsConsumer().poll(Duration.ofMillis(500));
             assertThat(records).hasSize(1);

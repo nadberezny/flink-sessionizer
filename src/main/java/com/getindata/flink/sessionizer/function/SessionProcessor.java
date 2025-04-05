@@ -51,8 +51,8 @@ public class SessionProcessor extends KeyedProcessFunction<Key, Session, OrderWi
 
     @Override
     public void processElement(Session session, KeyedProcessFunction<Key, Session, OrderWithSessions>.Context ctx, Collector<OrderWithSessions> out) throws Exception {
-        if (session.getLastEvent().getOrder() != null) {
-            var orderWithSessions = getOrderWithSession(ctx.getCurrentKey(), session.getLastEvent().getOrder());
+        if (session.isOrder()) {
+            var orderWithSessions = getOrderWithSession(ctx.getCurrentKey(), session.getOrder());
             out.collect(orderWithSessions);
         } else {
             add(session);
