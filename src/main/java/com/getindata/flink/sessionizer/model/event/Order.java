@@ -11,4 +11,6 @@ public class Order {
 
     private String id;
     private long timestamp;
+    private float total;
+    private float shipping;
 }

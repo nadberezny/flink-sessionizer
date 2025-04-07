@@ -8,9 +8,11 @@ public class MapToSessionJson implements MapFunction<Session, SessionJson> {
     
     @Override
     public SessionJson map(Session session) throws Exception {
+        session.getLastEvent().getPageView().getMarketingChannel();
         return new SessionJson(
                 session.getId(),
                 session.getUserId().getValue(),
+                session.getMarketingChannel().getName(),
                 session.getTimestamp(),
                 session.getPageViewCount(),
                 (int) session.getDurationMillis());

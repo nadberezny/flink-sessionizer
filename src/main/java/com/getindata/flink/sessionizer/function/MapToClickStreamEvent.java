@@ -23,7 +23,7 @@ public class MapToClickStreamEvent implements MapFunction<ClickStreamEventJson, 
         if (input.pageview() != null) {
             var inputPv = input.pageview();
             UUID id = HashingUtility.fromStrings(List.of(
-                   inputPv.uid(), inputPv.url(), input.createdAt()
+                    inputPv.uid(), inputPv.url(), input.createdAt()
             ));
             pageView = new PageView(
                     id.toString(),
@@ -35,7 +35,11 @@ public class MapToClickStreamEvent implements MapFunction<ClickStreamEventJson, 
 
         Order order;
         if (input.order() != null) {
-            order = new Order(input.order().orderId(), timestamp);
+            order = new Order(
+                    input.order().orderId(),
+                    timestamp,
+                    input.order().total().floatValue(),
+                    input.order().shipping().floatValue());
         } else {
             order = null;
         }
