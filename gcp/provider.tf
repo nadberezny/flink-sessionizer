@@ -3,3 +3,14 @@ provider "google" {
   region  = local.gcp_region
   project = local.gcp_project
 }
+
+provider clickhouse {
+  organization_id = var.ch_organization_id
+  token_key   	= var.ch_token_key
+  token_secret	= var.ch_token_secret
+}
+
+provider "confluent" {
+  cloud_api_key    = var.confluent_cloud_key
+  cloud_api_secret = var.confluent_cloud_secret
+}
