@@ -1,9 +1,5 @@
 resource "confluent_environment" "development" {
   display_name = "Development"
-
-  lifecycle {
-    prevent_destroy = false
-  }
 }
 
 resource "confluent_kafka_cluster" "basic" {
@@ -16,8 +12,20 @@ resource "confluent_kafka_cluster" "basic" {
   environment {
     id = confluent_environment.development.id
   }
+}
 
-  lifecycle {
-    prevent_destroy = false
+resource "confluent_kafka_topic" "topics" {
+  for_each = toset(["orders"])
+
+  kafka_cluster {
+    id = confluent_kafka_cluster.basic.id
+  }
+
+  topic_name    = each.key
+  rest_endpoint = confluent_kafka_cluster.basic.rest_endpoint
+
+  credentials {
+    key    = var.confluent_kafka_key
+    secret = var.confluent_kafka_secret
   }
 }
