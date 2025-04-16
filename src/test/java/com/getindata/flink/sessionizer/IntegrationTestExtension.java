@@ -1,6 +1,7 @@
 package com.getindata.flink.sessionizer;
 
 import com.getindata.flink.sessionizer.config.JobConfig;
+import com.getindata.flink.sessionizer.config.KafkaConfig;
 import com.getindata.flink.sessionizer.serde.input.ClickStreamEventJson;
 import com.getindata.flink.sessionizer.serde.kafka.JsonSerializer;
 import com.getindata.flink.sessionizer.serde.kafka.OrderWithAttributedSessionsDeserializer;
@@ -143,9 +144,8 @@ public class IntegrationTestExtension implements BeforeAllCallback, AfterAllCall
         ));
         orderWithSessionsConsumer.subscribe(List.of(attributedOrdersTopic));
 
-        var jobConfig = new JobConfig(
-                redpanda.getBootstrapServers(), clickStreamTopic, sessionsTopic, attributedOrdersTopic, Duration.ofMinutes(30)
-        );
+        var kafkaConfig = new KafkaConfig(redpanda.getBootstrapServers(), "PLAIN", null, clickStreamTopic, sessionsTopic, attributedOrdersTopic);
+        var jobConfig = new JobConfig(Duration.ofMinutes(30), kafkaConfig);
         env = StreamExecutionEnvironment.getExecutionEnvironment();
         env.setParallelism(2);
         setupCheckpointing(env);

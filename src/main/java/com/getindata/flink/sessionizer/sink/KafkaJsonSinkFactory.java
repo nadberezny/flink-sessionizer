@@ -11,6 +11,8 @@ import org.apache.kafka.clients.producer.ProducerRecord;
 
 import java.io.Serializable;
 import java.nio.charset.StandardCharsets;
+import java.util.Map;
+import java.util.Properties;
 
 import static com.fasterxml.jackson.databind.DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES;
 import static com.fasterxml.jackson.databind.DeserializationFeature.READ_UNKNOWN_ENUM_VALUES_USING_DEFAULT_VALUE;
@@ -26,14 +28,19 @@ public class KafkaJsonSinkFactory {
 
     public static <V> KafkaSink<V> create(
             String bootstrapServers,
+            Properties kafkaProperties,
             String topic,
             KeySelector<V, String> keySelector,
             SerializableFunction<V, Long> timestampProvider) {
-        return KafkaSink.<V>builder()
+        var builder = KafkaSink.<V>builder()
                 .setBootstrapServers(bootstrapServers)
                 .setRecordSerializer(new SerializationSchema<>(topic, keySelector, timestampProvider))
-                .setDeliveryGuarantee(DeliveryGuarantee.AT_LEAST_ONCE)
-                .build();
+                .setDeliveryGuarantee(DeliveryGuarantee.AT_LEAST_ONCE);
+
+        for (Map.Entry<Object, Object> property : kafkaProperties.entrySet()) {
+            builder.setProperty((String) property.getKey(), (String) property.getValue());
+        }
+        return builder.build();
     }
 
     static class SerializationSchema<V> implements KafkaRecordSerializationSchema<V>, Serializable {

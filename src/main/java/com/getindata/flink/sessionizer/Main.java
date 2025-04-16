@@ -1,6 +1,7 @@
 package com.getindata.flink.sessionizer;
 
 import com.getindata.flink.sessionizer.config.JobConfig;
+import com.getindata.flink.sessionizer.config.KafkaConfig;
 import com.getindata.flink.sessionizer.function.MapToAttributedOrderJson;
 import com.getindata.flink.sessionizer.function.MapToOrderWithAttributedSessions;
 import com.getindata.flink.sessionizer.function.MapToSessionJson;
@@ -38,8 +39,9 @@ public class Main {
 
     public static void build(JobConfig config, StreamExecutionEnvironment env, AttributionService attributionService) {
         // Source
+        KafkaConfig kafkaConfig = config.getKafkaConfig();
         KafkaSource<ClickStreamEvent> clickStreamKafkaSource = EventKafkaSource.create(
-                config.getBootStrapServers(), config.getClickStreamTopic(), OffsetsInitializer.earliest());
+                kafkaConfig.getBootstrapServers(), kafkaConfig.getKafkaProperties(), kafkaConfig.getClickStreamTopic(), OffsetsInitializer.earliest());
 
         // Building sessions
         DataStream<ClickStreamEvent> clickStreamEvents = env
@@ -60,14 +62,16 @@ public class Main {
 
         // Sinks
         KafkaSink<SessionJson> sessionsSink = KafkaJsonSinkFactory.create(
-                config.getBootStrapServers(),
-                config.getSessionsTopic(),
+                kafkaConfig.getBootstrapServers(),
+                kafkaConfig.getKafkaProperties(),
+                kafkaConfig.getSessionsTopic(),
                 (KeySelector<SessionJson, String>) SessionJson::sessionId,
                 SessionJson::timestamp);
 
         KafkaSink<AttributedOrderJson> attributedOrdersSink = KafkaJsonSinkFactory.create(
-                config.getBootStrapServers(),
-                config.getAttributedOrdersTopic(),
+                kafkaConfig.getBootstrapServers(),
+                kafkaConfig.getKafkaProperties(),
+                kafkaConfig.getAttributedOrdersTopic(),
                 (KeySelector<AttributedOrderJson, String>) AttributedOrderJson::orderId,
                 AttributedOrderJson::timestamp);
 
