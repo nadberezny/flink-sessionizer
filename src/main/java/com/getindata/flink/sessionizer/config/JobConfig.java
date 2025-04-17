@@ -17,6 +17,6 @@ public class JobConfig implements Serializable {
     public JobConfig(Config config) {
         var jobConfig = config.getConfig("job");
         sessionInactivityGap = Duration.parse(jobConfig.getString("sessionInactivityGap"));
-        kafkaConfig = new KafkaConfig(config);
+        kafkaConfig = new KafkaConfig(jobConfig);
     }
 }
