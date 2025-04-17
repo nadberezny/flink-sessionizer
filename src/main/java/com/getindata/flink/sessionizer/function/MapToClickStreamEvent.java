@@ -17,37 +17,37 @@ public class MapToClickStreamEvent implements MapFunction<ClickStreamEventJson, 
 
     @Override
     public ClickStreamEvent map(ClickStreamEventJson input) {
-        long timestamp = Instant.parse(input.createdAt()).toEpochMilli();
+        long timestamp = Instant.parse(input.getCreatedAt()).toEpochMilli();
 
         PageView pageView;
-        if (input.pageview() != null) {
-            var inputPv = input.pageview();
+        if (input.getPageview() != null) {
+            var inputPv = input.getPageview();
             UUID id = HashingUtility.fromStrings(List.of(
-                    inputPv.uid(), inputPv.url(), input.createdAt()
+                    inputPv.getUid(), inputPv.getUrl(), input.getCreatedAt()
             ));
             pageView = new PageView(
                     id.toString(),
-                    new MarketingChannel(inputPv.channel()),
-                    inputPv.url());
+                    new MarketingChannel(inputPv.getChannel()),
+                    inputPv.getUrl());
         } else {
             pageView = null;
         }
 
         Order order;
-        if (input.order() != null) {
+        if (input.getOrder() != null) {
             order = new Order(
-                    input.order().orderId(),
+                    input.getOrder().getOrderId(),
                     timestamp,
-                    input.order().total().floatValue(),
-                    input.order().shipping().floatValue());
+                    input.getOrder().getTotal().floatValue(),
+                    input.getOrder().getShipping().floatValue());
         } else {
             order = null;
         }
 
         return new ClickStreamEvent(
-                Instant.parse(input.createdAt()).toEpochMilli(),
+                Instant.parse(input.getCreatedAt()).toEpochMilli(),
                 "UTC",
-                new Key(input.key()),
+                new Key(input.getKey()),
                 pageView,
                 order
         );

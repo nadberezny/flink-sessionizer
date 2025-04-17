@@ -76,9 +76,9 @@ public class IntegrationTestExtension implements BeforeAllCallback, AfterAllCall
     private AdminClient kafkaAdmin;
 
     private KafkaProducer<String, ClickStreamEventJson> clickStreamProducer;
-    
+
     private KafkaConsumer<String, SessionJson> sessionsConsumer;
-    
+
     private KafkaConsumer<String, AttributedOrderJson> orderWithSessionsConsumer;
 
     private StreamExecutionEnvironment env;
@@ -134,7 +134,7 @@ public class IntegrationTestExtension implements BeforeAllCallback, AfterAllCall
                 VALUE_DESERIALIZER_CLASS_CONFIG, SessionsDeserializer.class.getName()
         ));
         sessionsConsumer.subscribe(List.of(sessionsTopic));
-                
+
         orderWithSessionsConsumer = new KafkaConsumer<>(Map.of(
                 BOOTSTRAP_SERVERS_CONFIG, redpanda.getBootstrapServers(),
                 GROUP_ID_CONFIG, randomUUID().toString(),
@@ -170,8 +170,11 @@ public class IntegrationTestExtension implements BeforeAllCallback, AfterAllCall
         env.enableCheckpointing(500);
         env.getCheckpointConfig().setCheckpointStorage("file://" + checkpointDir.getAbsolutePath());
     }
-    
-    public record IntegrationTextCtx(KafkaProducer<String, ClickStreamEventJson> clickStreamProducer,
-                                     KafkaConsumer<String, SessionJson> sessionsConsumer,
-                                     KafkaConsumer<String, AttributedOrderJson> orderWithSessionsConsumer) {}
+
+    @lombok.Value
+    public static class IntegrationTextCtx {
+        KafkaProducer<String, ClickStreamEventJson> clickStreamProducer;
+        KafkaConsumer<String, SessionJson> sessionsConsumer;
+        KafkaConsumer<String, AttributedOrderJson> orderWithSessionsConsumer;
+    }
 }

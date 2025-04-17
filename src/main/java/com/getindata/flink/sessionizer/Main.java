@@ -31,8 +31,8 @@ import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 public class Main {
 
     public static void main(String[] args) throws Exception {
-        var config = new JobConfig(ConfigFactory.load());
-        var env = StreamExecutionEnvironment.getExecutionEnvironment();
+        JobConfig config = new JobConfig(ConfigFactory.load());
+        StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
         build(config, env, new DummyAttributionService());
         env.execute();
     }
@@ -65,15 +65,15 @@ public class Main {
                 kafkaConfig.getBootstrapServers(),
                 kafkaConfig.getKafkaProperties(),
                 kafkaConfig.getSessionsTopic(),
-                (KeySelector<SessionJson, String>) SessionJson::sessionId,
-                SessionJson::timestamp);
+                (KeySelector<SessionJson, String>) SessionJson::getSessionId,
+                SessionJson::getTimestamp);
 
         KafkaSink<AttributedOrderJson> attributedOrdersSink = KafkaJsonSinkFactory.create(
                 kafkaConfig.getBootstrapServers(),
                 kafkaConfig.getKafkaProperties(),
                 kafkaConfig.getAttributedOrdersTopic(),
-                (KeySelector<AttributedOrderJson, String>) AttributedOrderJson::orderId,
-                AttributedOrderJson::timestamp);
+                (KeySelector<AttributedOrderJson, String>) AttributedOrderJson::getOrderId,
+                AttributedOrderJson::getTimestamp);
 
         sessions
                 .filter(session -> !session.isOrder())

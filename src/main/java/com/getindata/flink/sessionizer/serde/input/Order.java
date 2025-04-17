@@ -3,18 +3,26 @@ package com.getindata.flink.sessionizer.serde.input;
 import java.math.BigInteger;
 import java.util.List;
 
-public record Order(String uid,
-                    String orderId,
-                    String ip,
-                    String country,
-                    String userAgent,
-                    BigInteger total,
-                    BigInteger totalProductsNet,
-                    BigInteger shipping,
-                    String currency,
-                    List<Product> products,
-                    BigInteger tax,
-                    List<Voucher> vouchers,
-                    BigInteger paymentFee,
-                    String paymentMethod) {
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+public class Order {
+    private String uid;
+    private String orderId;
+    private String ip;
+    private String country;
+    private String userAgent;
+    private BigInteger total;
+    private BigInteger totalProductsNet;
+    private BigInteger shipping;
+    private String currency;
+    private List<Product> products;
+    private BigInteger tax;
+    private List<Voucher> vouchers;
+    private BigInteger paymentFee;
+    private String paymentMethod;
 }

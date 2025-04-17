@@ -1,4 +1,13 @@
 package com.getindata.flink.sessionizer.serde.input;
 
-public record EventKey(String frontendId, String visitorId) {
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+public class EventKey {
+    private String frontendId;
+    private String visitorId;
 }

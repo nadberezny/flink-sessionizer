@@ -2,7 +2,15 @@ package com.getindata.flink.sessionizer.serde.input;
 
 import java.math.BigInteger;
 
-public record Voucher(String voucher,
-                      BigInteger voucherDiscount,
-                      String voucherType) {
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+public class Voucher {
+    private String voucher;
+    private BigInteger voucherDiscount;
+    private String voucherType;
 }

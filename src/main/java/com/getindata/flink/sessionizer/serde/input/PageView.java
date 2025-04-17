@@ -1,17 +1,22 @@
 package com.getindata.flink.sessionizer.serde.input;
 
-public record PageView(
-    String uid,
-    String productId,
-    String url,
-    String channel,
-    String channelGroup,
-    String campaign,
-    String referrer,
-    String country,
-    String userAgent,
-    String ip,
-    String impressionId
-) {
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+public class PageView {
+    private String uid;
+    private String productId;
+    private String url;
+    private String channel;
+    private String channelGroup;
+    private String campaign;
+    private String referrer;
+    private String country;
+    private String userAgent;
+    private String ip;
+    private String impressionId;
 }

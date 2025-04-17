@@ -19,12 +19,12 @@ public class KafkaConfig implements Serializable {
     String attributedOrdersTopic;
 
     public KafkaConfig(Config config) {
-        var kafkaConfig = config.getConfig("kafka");
+        Config kafkaConfig = config.getConfig("kafka");
         bootstrapServers = kafkaConfig.getString("bootstrapServers");
 
         securityProtocol = kafkaConfig.getString("securityProtocol");
         if (securityProtocol.equals("SASL_SSL")) {
-            var saslConfig = kafkaConfig.getConfig("sasl");
+            Config saslConfig = kafkaConfig.getConfig("sasl");
             sasl = new SaslConfig(saslConfig.getString("jaas.config"), saslConfig.getString("mechanism"));
         } else {
             sasl = null;

@@ -52,7 +52,7 @@ public class SessionProcessor extends KeyedProcessFunction<Key, Session, OrderWi
     @Override
     public void processElement(Session session, KeyedProcessFunction<Key, Session, OrderWithSessions>.Context ctx, Collector<OrderWithSessions> out) throws Exception {
         if (session.isOrder()) {
-            var orderWithSessions = getOrderWithSession(ctx.getCurrentKey(), session.getOrder());
+            OrderWithSessions orderWithSessions = getOrderWithSession(ctx.getCurrentKey(), session.getOrder());
             out.collect(orderWithSessions);
         } else {
             add(session);
@@ -85,7 +85,7 @@ public class SessionProcessor extends KeyedProcessFunction<Key, Session, OrderWi
 
     public OrderWithSessions getOrderWithSession(Key userId, Order order) throws Exception {
         log.info("Handling order event {}", order);
-        var sessions = getSessionsByMaxLookback(order.getTimestamp() - maxSessionLookback.toMillis());
+        List<Session> sessions = getSessionsByMaxLookback(order.getTimestamp() - maxSessionLookback.toMillis());
         removeSessionsFromCache();
 
         return new OrderWithSessions(userId, order.getTimestamp(), order, sessions);
@@ -101,6 +101,6 @@ public class SessionProcessor extends KeyedProcessFunction<Key, Session, OrderWi
     private List<Session> getSessionsByMaxLookback(long maxSessionLookbackTimestamp) throws Exception {
         return getSessionsFromCache()
                 .filter(s -> s.getTimestamp() >= maxSessionLookbackTimestamp)
-                .toList();
+                .collect(Collectors.toList());
     }
 }
