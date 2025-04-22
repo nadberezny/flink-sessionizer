@@ -1,0 +1,13 @@
+ext {
+    targetDockerImageName = 'nadberezny/attribution-service'
+}
+
+tasks.register('dockerBuildAndPushImage', Exec) {
+    String dockerTag
+    dockerTag = project.hasProperty("dockerTag") ? project.getProperty("dockerTag") : "git rev-parse HEAD".execute().text.trim()
+
+    String dockerPlatform
+    dockerPlatform = project.hasProperty("dockerPlatform") ? project.getProperty("dockerPlatform") : "linux/amd64"
+
+    commandLine 'docker', 'build', '--platform', dockerPlatform, '-t', "$targetDockerImageName:$dockerTag", '--push', '.'
+}
