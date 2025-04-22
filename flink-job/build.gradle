@@ -1,0 +1,134 @@
+plugins {
+    id 'java'
+    id 'application'
+    // shadow plugin to produce fat JARs
+    id("com.gradleup.shadow") version "8.3.6"
+    id("io.freefair.lombok") version "8.12.2.1"
+}
+// artifact properties
+group = 'org.quickstart'
+version = '0.1-SNAPSHOT'
+mainClassName = 'com.getindata.flink.sessionizer.Main'
+description = """Flink Quickstart Job"""
+ext {
+    targetDockerImageName = 'nadberezny/flink-sessionizer'
+    kafkaVersion = '3.9.0'
+    flinkVersion = '1.20.1'
+    scalaBinaryVersion = '_2.12'
+    slf4jVersion = '1.7.36'
+    log4jVersion = '2.17.1'
+    jupiterVersion = '5.10.2'
+    testContainersVersion = '1.20.6'
+}
+
+applicationDefaultJvmArgs = ["-Dlog4j.configurationFile=log4j2.properties"]
+
+// declare where to find the dependencies of your project
+repositories {
+    gradlePluginPortal()
+    mavenCentral()
+    maven {
+        url "https://repository.apache.org/content/repositories/snapshots"
+        mavenContent {
+            snapshotsOnly()
+        }
+    }
+}
+// NOTE: We cannot use "compileOnly" or "shadow" configurations since then we could not run code
+// in the IDE or with "gradle run". We also cannot exclude transitive dependencies from the
+// shadowJar yet (see https://github.com/johnrengelman/shadow/issues/159).
+// -> Explicitly define the // libraries we want to be included in the "flinkShadowJar" configuration!
+configurations {
+    flinkShadowJar // dependencies which go into the shadowJar
+    // always exclude these (also from transitive dependencies) since they are provided by Flink
+    flinkShadowJar.exclude group: 'org.apache.flink', module: 'force-shading'
+    flinkShadowJar.exclude group: 'com.google.code.findbugs', module: 'jsr305'
+    flinkShadowJar.exclude group: 'org.slf4j'
+    flinkShadowJar.exclude group: 'org.apache.logging.log4j'
+}
+// declare the dependencies for your production and test code
+dependencies {
+    // --------------------------------------------------------------
+    // Compile-time dependencies that should NOT be part of the
+    // shadow (uber) jar and are provided in the lib folder of Flink
+    // --------------------------------------------------------------
+    implementation "org.apache.flink:flink-streaming-java:${flinkVersion}"
+    implementation "org.apache.flink:flink-clients:${flinkVersion}"
+    implementation("org.apache.flink:flink-connector-base:${flinkVersion}")
+    implementation("org.apache.flink:flink-connector-kafka:3.4.0-1.20")
+    implementation("org.apache.kafka:kafka-clients:${kafkaVersion}")
+    implementation("commons-codec:commons-codec:1.18.0")
+    implementation("org.apache.commons:commons-lang3:3.17.0")
+
+    // external config
+    implementation("com.typesafe:config:1.4.3")
+
+    // serde
+    implementation("com.fasterxml.jackson.core:jackson-databind:2.0.1")
+    implementation("com.fasterxml.jackson.module:jackson-module-jaxb-annotations:2.0.1")
+
+    // --------------------------------------------------------------
+    // Dependencies that should be part of the shadow jar, e.g.
+    // connectors. These must be in the flinkShadowJar configuration!
+    // --------------------------------------------------------------
+    //flinkShadowJar "org.apache.flink:flink-connector-kafka:${flinkVersion}"
+    runtimeOnly "org.apache.logging.log4j:log4j-slf4j-impl:${log4jVersion}"
+    runtimeOnly "org.apache.logging.log4j:log4j-api:${log4jVersion}"
+    runtimeOnly "org.apache.logging.log4j:log4j-core:${log4jVersion}"
+
+    testImplementation "org.junit.jupiter:junit-jupiter:${jupiterVersion}"
+    testImplementation "org.junit.jupiter:junit-jupiter-api:${jupiterVersion}"
+    testImplementation "org.junit.jupiter:junit-jupiter-engine:${jupiterVersion}"
+    testImplementation "org.apache.flink:flink-test-utils:${flinkVersion}"
+    testImplementation "org.apache.flink:flink-test-utils-junit:${flinkVersion}"
+    testImplementation "org.testcontainers:testcontainers:${testContainersVersion}"
+    testImplementation "org.testcontainers:kafka:${testContainersVersion}"
+    testImplementation "org.testcontainers:redpanda:${testContainersVersion}"
+    testImplementation("org.awaitility:awaitility:4.3.0")
+}
+// make compileOnly dependencies available for tests:
+sourceSets {
+    main.compileClasspath += configurations.flinkShadowJar
+    main.runtimeClasspath += configurations.flinkShadowJar
+    test.compileClasspath += configurations.flinkShadowJar
+    test.runtimeClasspath += configurations.flinkShadowJar
+    javadoc.classpath += configurations.flinkShadowJar
+}
+run.classpath = sourceSets.main.runtimeClasspath
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(11)
+    }
+}
+
+jar {
+    manifest {
+        attributes 'Built-By': System.getProperty('user.name'),
+                'Build-Jdk': System.getProperty('java.version')
+    }
+}
+
+test {
+    useJUnitPlatform()
+}
+
+tasks.register('dockerBuildAndPushImage', Exec) {
+    String dockerTag
+    dockerTag = project.hasProperty("dockerTag") ? project.getProperty("dockerTag") : "git rev-parse HEAD".execute().text.trim()
+
+    String dockerPlatform
+    dockerPlatform = project.hasProperty("dockerPlatform") ? project.getProperty("dockerPlatform") : "linux/amd64"
+
+    commandLine 'docker', 'build', '--platform', dockerPlatform, '-t', "$targetDockerImageName:$dockerTag", '--push', '.'
+}
+dockerBuildAndPushImage.dependsOn(shadowJar)
+
+tasks.register('dockerBuildxAndPushImage', Exec) {
+    String dockerTag
+
+    dockerTag = project.hasProperty("dockerTag") ? project.getProperty("dockerTag") : "git rev-parse HEAD".execute().text.trim()
+
+    commandLine 'docker', 'buildx', 'build', '--platform', 'linux/amd64,linux/arm64', '-t', "$targetDockerImageName:$dockerTag", '--push', '.'
+}
+dockerBuildxAndPushImage.dependsOn(shadowJar)

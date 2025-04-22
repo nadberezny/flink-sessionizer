@@ -33,5 +33,5 @@ jobs:
 
       - name: Build Docker image
         run: |
-          ./gradlew dockerBuildAndPushImage -PdockerPlatform=linux/amd64 -PdockerTag=latest
+          ./gradlew :flink-job:dockerBuildAndPushImage -PdockerPlatform=linux/amd64 -PdockerTag=latest
           docker build -t ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest .
