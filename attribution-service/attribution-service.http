@@ -1,0 +1,72 @@
+### Health Check
+GET https://{{host}}/
+Accept: text/plain
+
+### Attribution Service - Empty Sessions
+POST https://{{host}}/attribution
+Content-Type: application/json
+
+{
+  "userId": {
+    "value": "user123"
+  },
+  "timestamp": 1625097600000,
+  "order": {
+    "id": "order123",
+    "timestamp": 1625097600000,
+    "total": 100.0,
+    "shipping": 5.0
+  },
+  "sessions": []
+}
+
+### Attribution Service - With Sessions
+POST http://{{host}}:8080/attribution
+Content-Type: application/json
+
+{
+  "userId": {
+    "value": "user123"
+  },
+  "timestamp": 1625097600000,
+  "order": {
+    "id": "order123",
+    "timestamp": 1625097600000,
+    "total": 100.0,
+    "shipping": 5.0
+  },
+  "sessions": [
+    {
+      "id": "session123",
+      "timestamp": 1625097500000,
+      "userId": {
+        "value": "user123"
+      },
+      "windowFrom": 1625097400000,
+      "windowTo": 1625097600000,
+      "pageViewCount": 5,
+      "durationMillis": 200000,
+      "marketingChannel": "ORGANIC",
+      "landingPage": "/home",
+      "lastEvent": {
+        "order": null
+      }
+    },
+    {
+      "id": "session456",
+      "timestamp": 1625097300000,
+      "userId": {
+        "value": "user123"
+      },
+      "windowFrom": 1625097200000,
+      "windowTo": 1625097400000,
+      "pageViewCount": 3,
+      "durationMillis": 150000,
+      "marketingChannel": "PAID",
+      "landingPage": "/products",
+      "lastEvent": {
+        "order": null
+      }
+    }
+  ]
+}
