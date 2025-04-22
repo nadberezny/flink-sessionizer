@@ -21,7 +21,7 @@ Content-Type: application/json
 }
 
 ### Attribution Service - With Sessions
-POST http://{{host}}:8080/attribution
+POST https://{{host}}/attribution
 Content-Type: application/json
 
 {
