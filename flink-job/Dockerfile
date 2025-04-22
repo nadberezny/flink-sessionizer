@@ -10,4 +10,4 @@ RUN cp /opt/flink/opt/flink-s3-fs-hadoop-1.20.1.jar /opt/flink/plugins/s3-fs-had
 
 # job jar
 RUN mkdir -p /opt/flink/usrlib
-ADD build/libs/flink-sessionizer-0.1-SNAPSHOT-all.jar /opt/flink/usrlib/flink-sessionizer.jar
+ADD ./build/libs/flink-job-0.1-SNAPSHOT-all.jar /opt/flink/usrlib/flink-sessionizer.jar
