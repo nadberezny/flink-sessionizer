@@ -1,4 +1,4 @@
-FROM flink:1.20.1-java17
+FROM flink:1.20.1-java11
 
 # Add s3 plugin for s3 state backend
 RUN mkdir /opt/flink/plugins/s3-fs-presto
