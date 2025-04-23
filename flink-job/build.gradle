@@ -14,6 +14,7 @@ ext {
     targetDockerImageName = 'nadberezny/flink-sessionizer'
     kafkaVersion = '3.9.0'
     flinkVersion = '1.20.1'
+    debeziumVersion = '1.9.8.Final'
     scalaBinaryVersion = '_2.12'
     slf4jVersion = '1.7.36'
     log4jVersion = '2.17.1'
@@ -46,7 +47,7 @@ configurations {
     flinkShadowJar.exclude group: 'org.slf4j'
     flinkShadowJar.exclude group: 'org.apache.logging.log4j'
 }
-// declare the dependencies for your production and test code
+
 dependencies {
     // --------------------------------------------------------------
     // Compile-time dependencies that should NOT be part of the
@@ -56,6 +57,11 @@ dependencies {
     implementation "org.apache.flink:flink-clients:${flinkVersion}"
     implementation("org.apache.flink:flink-connector-base:${flinkVersion}")
     implementation("org.apache.flink:flink-connector-kafka:3.4.0-1.20")
+    implementation("org.apache.flink:flink-connector-mysql-cdc:3.3.0")
+    implementation("io.debezium:debezium-connector-mysql:${debeziumVersion}")
+    implementation("io.debezium:debezium-core:${debeziumVersion}")
+    implementation("io.debezium:debezium-api:${debeziumVersion}")
+    implementation("org.apache.flink:flink-connector-mysql-cdc")
     implementation("org.apache.kafka:kafka-clients:${kafkaVersion}")
     implementation("commons-codec:commons-codec:1.18.0")
     implementation("org.apache.commons:commons-lang3:3.17.0")
@@ -82,8 +88,8 @@ dependencies {
     testImplementation "org.apache.flink:flink-test-utils:${flinkVersion}"
     testImplementation "org.apache.flink:flink-test-utils-junit:${flinkVersion}"
     testImplementation "org.testcontainers:testcontainers:${testContainersVersion}"
-    testImplementation "org.testcontainers:kafka:${testContainersVersion}"
     testImplementation "org.testcontainers:redpanda:${testContainersVersion}"
+    testImplementation "org.testcontainers:mysql:${testContainersVersion}"
     testImplementation("org.awaitility:awaitility:4.3.0")
 }
 // make compileOnly dependencies available for tests:

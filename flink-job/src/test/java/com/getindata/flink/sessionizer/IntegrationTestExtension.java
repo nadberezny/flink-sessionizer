@@ -1,7 +1,9 @@
 package com.getindata.flink.sessionizer;
 
+import com.getindata.flink.sessionizer.config.CDCConfig;
 import com.getindata.flink.sessionizer.config.JobConfig;
 import com.getindata.flink.sessionizer.config.KafkaConfig;
+import com.getindata.flink.sessionizer.repository.OrderReturnsRepository;
 import com.getindata.flink.sessionizer.serde.input.ClickStreamEventJson;
 import com.getindata.flink.sessionizer.serde.kafka.JsonSerializer;
 import com.getindata.flink.sessionizer.serde.kafka.OrderWithAttributedSessionsDeserializer;
@@ -32,6 +34,7 @@ import org.junit.jupiter.api.extension.ParameterResolutionException;
 import org.junit.jupiter.api.extension.ParameterResolver;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.slf4j.LoggerFactory;
+import org.testcontainers.containers.MySQLContainer;
 import org.testcontainers.containers.Network;
 import org.testcontainers.containers.output.Slf4jLogConsumer;
 import org.testcontainers.redpanda.RedpandaContainer;
@@ -73,6 +76,20 @@ public class IntegrationTestExtension implements BeforeAllCallback, AfterAllCall
             .withCreateContainerCmdModifier(modifier -> modifier.withName("kafka-" + randomAlphabetic(4)))
             .withLogConsumer(new Slf4jLogConsumer(LoggerFactory.getLogger(RedpandaContainer.class)));
 
+    private final MySQLContainer<?> mysql = new MySQLContainer<>("mysql:8.0")
+            .withNetwork(network)
+            .withCreateContainerCmdModifier(modifier -> modifier.withName("mysql-" + randomAlphabetic(4)))
+            .withDatabaseName("testdb")
+            .withUsername("root")
+            .withPassword("test")
+            // Enable binary logging for CDC
+            .withCommand("--server-id=1",
+                    "--log-bin=mysql-bin",
+                    "--binlog_format=ROW",
+                    "--binlog_row_metadata=FULL")
+            .withInitScript("initializeMySql.sql")
+            .withLogConsumer(new Slf4jLogConsumer(LoggerFactory.getLogger(MySQLContainer.class)));
+
     private AdminClient kafkaAdmin;
 
     private KafkaProducer<String, ClickStreamEventJson> clickStreamProducer;
@@ -81,12 +98,17 @@ public class IntegrationTestExtension implements BeforeAllCallback, AfterAllCall
 
     private KafkaConsumer<String, AttributedOrderJson> orderWithSessionsConsumer;
 
+    private OrderReturnsRepository orderReturnsRepository;
+
     private StreamExecutionEnvironment env;
 
     @Override
     public void afterAll(ExtensionContext extensionContext) throws Exception {
         if (kafkaAdmin != null) {
             kafkaAdmin.close();
+        }
+        if (mysql.isRunning()) {
+            mysql.stop();
         }
     }
 
@@ -109,12 +131,15 @@ public class IntegrationTestExtension implements BeforeAllCallback, AfterAllCall
     @Override
     public void beforeAll(ExtensionContext extensionContext) throws Exception {
         redpanda.start();
+        mysql.start();
+
         kafkaAdmin = AdminClient.create(Map.of(BOOTSTRAP_SERVERS_CONFIG, redpanda.getBootstrapServers()));
         kafkaAdmin.createTopics(List.of(
                 new NewTopic(clickStreamTopic, Optional.empty(), Optional.empty()),
                 new NewTopic(sessionsTopic, Optional.empty(), Optional.empty()),
                 new NewTopic(attributedOrdersTopic, Optional.empty(), Optional.empty())
         ));
+        orderReturnsRepository = new OrderReturnsRepository(mysql.getJdbcUrl(), mysql.getUsername(), mysql.getPassword());
     }
 
     @Override
@@ -145,11 +170,21 @@ public class IntegrationTestExtension implements BeforeAllCallback, AfterAllCall
         orderWithSessionsConsumer.subscribe(List.of(attributedOrdersTopic));
 
         var kafkaConfig = new KafkaConfig(redpanda.getBootstrapServers(), "PLAIN", null, clickStreamTopic, sessionsTopic, attributedOrdersTopic);
-        var jobConfig = new JobConfig(Duration.ofMinutes(30), kafkaConfig);
+        var cdcConfig = new CDCConfig(
+            true,
+            Duration.ofDays(30),
+            mysql.getHost(),
+            mysql.getMappedPort(3306),
+            mysql.getDatabaseName(),
+            "testdb.order_returns",
+            mysql.getUsername(),
+            mysql.getPassword()
+        );
+        var jobConfig = new JobConfig(Duration.ofMinutes(30), "https://attribution-service", kafkaConfig, cdcConfig);
         env = StreamExecutionEnvironment.getExecutionEnvironment();
         env.setParallelism(2);
         setupCheckpointing(env);
-        Main.build(jobConfig, env, new DummyAttributionService());
+        Main.buildTopology(jobConfig, env, new DummyAttributionService());
         env.executeAsync();
     }
 
@@ -160,7 +195,7 @@ public class IntegrationTestExtension implements BeforeAllCallback, AfterAllCall
 
     @Override
     public Object resolveParameter(ParameterContext parameterContext, ExtensionContext extensionContext) throws ParameterResolutionException {
-        return new IntegrationTextCtx(clickStreamProducer, sessionsConsumer, orderWithSessionsConsumer);
+        return new IntegrationTextCtx(clickStreamProducer, sessionsConsumer, orderWithSessionsConsumer, orderReturnsRepository);
     }
 
     @SneakyThrows
@@ -176,5 +211,6 @@ public class IntegrationTestExtension implements BeforeAllCallback, AfterAllCall
         KafkaProducer<String, ClickStreamEventJson> clickStreamProducer;
         KafkaConsumer<String, SessionJson> sessionsConsumer;
         KafkaConsumer<String, AttributedOrderJson> orderWithSessionsConsumer;
+        OrderReturnsRepository orderReturnsRepository;
     }
 }

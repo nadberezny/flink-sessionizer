@@ -1,5 +1,6 @@
 package com.getindata.flink.sessionizer;
 
+import com.getindata.flink.sessionizer.model.cdc.OrderReturn;
 import com.getindata.flink.sessionizer.serde.input.ClickStreamEventJson;
 import com.getindata.flink.sessionizer.serde.input.Order;
 import com.getindata.flink.sessionizer.serde.input.PageView;
@@ -24,6 +25,7 @@ public class MainIntegrationTest {
         // given
         var key1 = "key1";
         var user1 = "user1";
+        var order1Id = "order1";
         var t1 = Instant.parse("2025-04-09T00:00:00Z");
         var t2 = Instant.parse("2025-04-09T01:00:00Z");
         var pv1 = new ClickStreamEventJson(
@@ -34,7 +36,7 @@ public class MainIntegrationTest {
 //                new PageView(user1, null, null, null, null, null, null, null, null, null, null),
 //                null, key1, null, null, null, null, t1.toString()
 //        );
-        var order1 = new ClickStreamEventJson(null, new Order(user1, "order1", null, null, null, BigInteger.valueOf(100), null, BigInteger.valueOf(20), null, null, null, null, null, null),
+        var order1 = new ClickStreamEventJson(null, new Order(user1, order1Id, null, null, null, BigInteger.valueOf(100), null, BigInteger.valueOf(20), null, null, null, null, null, null),
                 key1, "order", "frontend1", "n/a", "n/a", t2.toString());
 
         // when
@@ -55,6 +57,18 @@ public class MainIntegrationTest {
         given().ignoreExceptions().atMost(Duration.ofMinutes(3)).await().until(() -> {
             var records = ctx.getOrderWithSessionsConsumer().poll(Duration.ofMillis(500));
             assertThat(records).hasSize(1);
+            return true;
+        });
+
+        // CDC
+        var order1ReturnTimestamp = Instant.parse("2025-04-10T01:00:00Z");
+        ctx.getOrderReturnsRepository().insert(new OrderReturn(order1Id, order1ReturnTimestamp));
+        given().ignoreExceptions().atMost(Duration.ofMinutes(3)).await().until(() -> {
+            var records = ctx.getOrderWithSessionsConsumer().poll(Duration.ofMillis(500));
+            assertThat(records).hasSize(1);
+            records.forEach(record ->
+                    assertThat(record.value().getReturnTimestamp()).isEqualTo(order1ReturnTimestamp.toEpochMilli())
+            );
             return true;
         });
     }

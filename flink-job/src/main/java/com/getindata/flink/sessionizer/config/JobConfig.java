@@ -17,10 +17,13 @@ public class JobConfig implements Serializable {
 
     private final KafkaConfig kafkaConfig;
 
+    private final CDCConfig cdcConfig;
+
     public JobConfig(Config config) {
         var jobConfig = config.getConfig("job");
         sessionInactivityGap = Duration.parse(jobConfig.getString("sessionInactivityGap"));
         attributionServiceUrl = jobConfig.getString("attribution.serviceUrl");
         kafkaConfig = new KafkaConfig(jobConfig);
+        cdcConfig = new CDCConfig(jobConfig);
     }
 }

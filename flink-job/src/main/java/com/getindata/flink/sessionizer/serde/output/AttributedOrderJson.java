@@ -13,6 +13,7 @@ public class AttributedOrderJson {
     private String userId;
     private String marketingChannel;
     private long timestamp;
+    private long returnTimestamp;
     private int pageViewCount;
     private int durationMillis;
     private float total;

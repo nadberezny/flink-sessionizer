@@ -39,7 +39,8 @@ public class MapToClickStreamEvent implements MapFunction<ClickStreamEventJson, 
                     input.getOrder().getOrderId(),
                     timestamp,
                     input.getOrder().getTotal().floatValue(),
-                    input.getOrder().getShipping().floatValue());
+                    input.getOrder().getShipping().floatValue(),
+                    null);
         } else {
             order = null;
         }

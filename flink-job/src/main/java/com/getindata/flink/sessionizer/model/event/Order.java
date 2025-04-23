@@ -13,4 +13,5 @@ public class Order {
     private long timestamp;
     private float total;
     private float shipping;
+    private Long returnedTimestamp;
 }

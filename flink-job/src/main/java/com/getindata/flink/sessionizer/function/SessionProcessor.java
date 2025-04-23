@@ -31,6 +31,7 @@ public class SessionProcessor extends KeyedProcessFunction<Key, Session, OrderWi
 
     public static final String SESSIONS_CACHE_STATE = "sessionsCacheState";
 
+    // session.id -> session
     private static final MapStateDescriptor<String, Session> SESSIONS_CACHE_STATE_DESCRIPTOR = new MapStateDescriptor<>(SESSIONS_CACHE_STATE, String.class, Session.class);
 
     private MapState<String, Session> sessionsCacheState;

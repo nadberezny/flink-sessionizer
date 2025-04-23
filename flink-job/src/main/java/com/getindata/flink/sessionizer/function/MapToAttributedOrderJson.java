@@ -22,6 +22,7 @@ public class MapToAttributedOrderJson implements MapFunction<OrderWithAttributed
         int durationMillis = lastSession.map(AttributedSession::getSession).map(Session::getDurationMillis).orElse(0L).intValue();
         int weight = lastSession.map(AttributedSession::getWeight).orElse(0f).intValue();
         Order order = ows.getOrder();
+        long returnTimestamp = order.getReturnedTimestamp() == null ? 0 : order.getReturnedTimestamp();
 
         return new AttributedOrderJson(
                 order.getId(),
@@ -29,6 +30,7 @@ public class MapToAttributedOrderJson implements MapFunction<OrderWithAttributed
                 ows.getUserId().getValue(),
                 marketingChannel,
                 ows.getTimestamp(),
+                returnTimestamp,
                 pageViewCount,
                 durationMillis,
                 order.getTotal(),
