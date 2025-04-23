@@ -34,9 +34,7 @@ jobs:
       - name: Build and push flink-job image
         run: |
           ./gradlew :flink-job:dockerBuildAndPushImage -PdockerPlatform=linux/amd64 -PdockerTag=latest
-          docker build -t ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest .
 
       - name: Build and push attribution-service image
         run: |
           ./gradlew :attribution-service:dockerBuildAndPushImage -PdockerPlatform=linux/amd64 -PdockerTag=latest
-          docker build -t ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest .
