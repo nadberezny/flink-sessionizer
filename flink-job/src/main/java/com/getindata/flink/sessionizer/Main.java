@@ -16,6 +16,7 @@ import com.getindata.flink.sessionizer.serde.output.AttributedOrderJson;
 import com.getindata.flink.sessionizer.serde.output.SessionJson;
 import com.getindata.flink.sessionizer.service.AttributionService;
 import com.getindata.flink.sessionizer.service.DummyAttributionService;
+import com.getindata.flink.sessionizer.service.ExternalAttributionService;
 import com.getindata.flink.sessionizer.sessionwindow.SessionElementWindowAssigner;
 import com.getindata.flink.sessionizer.sink.KafkaJsonSinkFactory;
 import com.getindata.flink.sessionizer.source.EventKafkaSource;
@@ -33,7 +34,7 @@ public class Main {
     public static void main(String[] args) throws Exception {
         JobConfig config = new JobConfig(ConfigFactory.load());
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
-        build(config, env, new DummyAttributionService());
+        build(config, env, new ExternalAttributionService(config.getAttributionServiceUrl()));
         env.execute();
     }
 
