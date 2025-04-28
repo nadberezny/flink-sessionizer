@@ -7,7 +7,7 @@ GRANT REPLICATION SLAVE, REPLICATION CLIENT ON *.* TO '${cdc.user}'@'%';
 GRANT SELECT, RELOAD, SHOW DATABASES, LOCK TABLES ON *.* TO '${cdc.user}'@'%';
 FLUSH PRIVILEGES;
 
-CREATE DATABASE ${cdc.database};
+CREATE DATABASE IF NOT EXISTS ${cdc.database};
 
 CREATE TABLE ${cdc.database}.order_returns (
       order_id varchar(255) primary key,
