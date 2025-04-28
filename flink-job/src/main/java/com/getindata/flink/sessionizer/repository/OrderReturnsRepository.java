@@ -23,6 +23,8 @@ public class OrderReturnsRepository {
     public static final Calendar utcCalendar = Calendar.getInstance(TIME_ZONE);
 
     private final String jdbcUrl;
+    private final String database;
+    private final String table;
     private final String username;
     private final String password;
 
@@ -33,7 +35,7 @@ public class OrderReturnsRepository {
      * @return true if the insert was successful, false otherwise
      */
     public boolean insert(OrderReturn orderReturn) {
-        String sql = "INSERT INTO order_returns (order_id, return_timestamp) VALUES (?, ?)";
+        String sql = "INSERT INTO " + database + "." + table + " (order_id, return_timestamp) VALUES (?, ?)";
 
         try (Connection connection = getConnection();
              PreparedStatement statement = connection.prepareStatement(sql)) {
@@ -60,7 +62,7 @@ public class OrderReturnsRepository {
      * @return true if the update was successful, false otherwise
      */
     public boolean update(OrderReturn orderReturn) {
-        String sql = "UPDATE order_returns SET return_timestamp = ? WHERE order_id = ?";
+        String sql = "UPDATE " + database + "." + table +" SET return_timestamp = ? WHERE order_id = ?";
 
         try (Connection connection = getConnection();
              PreparedStatement statement = connection.prepareStatement(sql)) {
@@ -87,7 +89,7 @@ public class OrderReturnsRepository {
      * @return true if the delete was successful, false otherwise
      */
     public boolean delete(String id) {
-        String sql = "DELETE FROM order_returns WHERE order_id = ?";
+        String sql = "DELETE FROM " + database + "." + table + " WHERE order_id = ?";
 
         try (Connection connection = getConnection();
              PreparedStatement statement = connection.prepareStatement(sql)) {

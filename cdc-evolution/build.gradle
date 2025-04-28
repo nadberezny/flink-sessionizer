@@ -1,0 +1,53 @@
+plugins {
+    id 'java'
+    id 'application'
+    id "io.freefair.lombok" version "8.6"
+}
+
+group = 'com.getindata.streaming.demo'
+version = '1.0-SNAPSHOT'
+
+ext {
+    projectMajorVersion = '0.1'
+    targetDockerImageName = 'nadberezny/cdc-evolution'
+}
+
+String patchVersion = System.getenv('BUILD_NUMBER') ?: '0'
+project.version = "${projectMajorVersion}.${patchVersion}"
+
+application {
+    mainClass = 'com.getindata.flink.sessionizer.cdc.evolution.SchemaEvolutionApp'
+    applicationDefaultJvmArgs = ["-Xms256m", "-Xmx512m", "-Dlog4j.configurationFile=log4j2.properties"]
+}
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(11)
+    }
+}
+
+tasks.register('dockerBuildAndPushImage', Exec) {
+    String dockerTag = project.hasProperty("dockerTag")
+            ? project.getProperty("dockerTag")
+            : "git rev-parse HEAD".execute().text.trim()
+    String dockerPlatform = project.hasProperty("dockerPlatform")
+            ? project.getProperty("dockerPlatform")
+            : "linux/amd64"
+
+    commandLine 'docker', 'build', '--platform', dockerPlatform, '-t', "$targetDockerImageName:$dockerTag", '--push', "."
+}
+dockerBuildAndPushImage.dependsOn(installDist)
+
+dependencies {
+    implementation 'org.liquibase:liquibase-core:4.25.1'
+    implementation 'mysql:mysql-connector-java:8.0.33'
+
+    // Externalized config
+    implementation 'com.typesafe:config:1.4.3'
+
+    // Logging
+    implementation platform('org.apache.logging.log4j:log4j-bom:2.23.1')
+    implementation "org.apache.logging.log4j:log4j-slf4j2-impl"
+    implementation "org.apache.logging.log4j:log4j-api"
+    implementation "org.apache.logging.log4j:log4j-core"
+}

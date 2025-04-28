@@ -10,7 +10,7 @@
     "name": "mysql_binlog_source",
     "ts_ms": 0,
     "snapshot": "false",
-    "db": "testdb",
+    "db": "cdcdb",
     "sequence": null,
     "table": "order_returns",
     "server_id": 0,

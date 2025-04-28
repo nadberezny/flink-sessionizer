@@ -1,4 +1,18 @@
 rootProject.name = 'flink-sessionizer'
 
+include('cdc-evolution')
 include('attribution-service')
 include('flink-job')
+
+dependencyResolutionManagement {
+    repositories {
+        gradlePluginPortal()
+        mavenCentral()
+        maven {
+            url "https://repository.apache.org/content/repositories/snapshots"
+            mavenContent {
+                snapshotsOnly()
+            }
+        }
+    }
+}

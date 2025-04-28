@@ -50,7 +50,7 @@ public class OrderReturnsRepositoryTest {
         String username = mysql.getUsername();
         String password = mysql.getPassword();
 
-        repository = new OrderReturnsRepository(jdbcUrl, username, password);
+        repository = new OrderReturnsRepository(jdbcUrl, "testdb", "order_returns", username, password);
 
         // Create a connection for test verification
         connection = DriverManager.getConnection(jdbcUrl, username, password);
