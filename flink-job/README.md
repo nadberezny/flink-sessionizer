@@ -25,4 +25,15 @@ It is intended that reconciliation and deduplication of these updates will be ha
 ![Diagram](docs/flink-job-overview.png)
 
 ## Session Window
-Incoming events are grouped using a custom SessionWindow. 
+Incoming events are grouped using a custom SessionWindow.
+It is custom because it includes a specialized `SessionWindowAssigner`, `TimeWindow`, and `Trigger`.
+
+In a regular SessionWindow, the only condition that closes a window is an inactivity gap.
+In our implementation, we introduce additional types of triggers that can also close a window.
+
+Our custom session window closes based on three different factors:
+1.	Inactivity gap
+2.	Incoming Order event
+3.	Midnight (end of the day)
+
+Additionally, we provide a custom Trigger that emits the current state of the session on every incoming event, allowing continuous updates without waiting for the window to close.
