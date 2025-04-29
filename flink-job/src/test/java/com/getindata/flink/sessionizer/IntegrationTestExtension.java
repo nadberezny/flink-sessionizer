@@ -10,7 +10,8 @@ import com.getindata.flink.sessionizer.serde.kafka.OrderWithAttributedSessionsDe
 import com.getindata.flink.sessionizer.serde.kafka.SessionsDeserializer;
 import com.getindata.flink.sessionizer.serde.output.AttributedOrderJson;
 import com.getindata.flink.sessionizer.serde.output.SessionJson;
-import com.getindata.flink.sessionizer.service.DummyAttributionService;
+import com.getindata.flink.sessionizer.service.ExternalAttributionServiceSupplier;
+import com.getindata.flink.sessionizer.test.containers.AttributionServiceContainer;
 import com.getindata.flink.sessionizer.test.containers.CDCEvolutionContainer;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -73,6 +74,8 @@ public class IntegrationTestExtension implements BeforeAllCallback, AfterAllCall
 
     private static final Network network = Network.newNetwork();
 
+    private final AttributionServiceContainer attributionService = new AttributionServiceContainer(network);
+
     private final RedpandaContainer redpanda = new RedpandaContainer("docker.redpanda.com/redpandadata/redpanda:v23.1.2")
             .withNetwork(network)
             .withCreateContainerCmdModifier(modifier -> modifier.withName("kafka-" + randomAlphabetic(4)))
@@ -119,6 +122,7 @@ public class IntegrationTestExtension implements BeforeAllCallback, AfterAllCall
         if (redpanda.isRunning()) {
             redpanda.stop();
         }
+        attributionService.stop();
     }
 
     @Override
@@ -139,6 +143,7 @@ public class IntegrationTestExtension implements BeforeAllCallback, AfterAllCall
 
     @Override
     public void beforeAll(ExtensionContext extensionContext) throws Exception {
+        attributionService.start();
         redpanda.start();
         mysql.start();
         cdcEvolution = new CDCEvolutionContainer(network, "default", cdcDatabase, "cdcuser", "cdcpassword", mysql);
@@ -192,11 +197,11 @@ public class IntegrationTestExtension implements BeforeAllCallback, AfterAllCall
                 mysql.getUsername(),
                 mysql.getPassword()
         );
-        var jobConfig = new JobConfig(Duration.ofMinutes(30), "https://attribution-service", kafkaConfig, cdcConfig);
+        var jobConfig = new JobConfig(Duration.ofMinutes(30), null, kafkaConfig, cdcConfig);
         env = StreamExecutionEnvironment.getExecutionEnvironment();
         env.setParallelism(2);
         setupCheckpointing(env);
-        Main.buildTopology(jobConfig, env, new DummyAttributionService());
+        Main.buildTopology(jobConfig, env, new ExternalAttributionServiceSupplier("http://localhost:" + attributionService.getMappedPort(8080)));
         env.executeAsync();
     }
 

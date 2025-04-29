@@ -1,0 +1,49 @@
+{
+  "userId": {
+    "value": "key1"
+  },
+  "timestamp": 1744160400000,
+  "order": {
+    "id": "order1",
+    "timestamp": 1744160400000,
+    "total": 100,
+    "shipping": 20,
+    "returnedTimestamp": null
+  },
+  "sessions": [
+    {
+      "weight": 95,
+      "session": {
+        "id": "078d82c0-0c67-34b1-ab1b-09a62fc233b9",
+        "timestamp": 1744156800000,
+        "userId": {
+          "value": "key1"
+        },
+        "windowFrom": 1744156800000,
+        "windowTo": 1744158600000,
+        "pageViewCount": 1,
+        "durationMillis": 0,
+        "marketingChannel": {
+          "name": "ChannelA"
+        },
+        "landingPage": "https://mystore.com",
+        "lastEvent": {
+          "timestamp": 1744156800000,
+          "timeZone": "UTC",
+          "key": {
+            "value": "key1"
+          },
+          "pageView": {
+            "id": "078d82c0-0c67-34b1-ab1b-09a62fc233b9",
+            "marketingChannel": {
+              "name": "ChannelA"
+            },
+            "landingPage": "https://mystore.com"
+          },
+          "order": null
+        },
+        "order": null
+      }
+    }
+  ]
+}

@@ -1,5 +1,6 @@
 package com.getindata.flink.sessionizer.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.getindata.flink.sessionizer.model.event.Order;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -10,6 +11,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder(setterPrefix = "with")
+@JsonIgnoreProperties(ignoreUnknown = true)
 public final class Session {
 
     private String id;

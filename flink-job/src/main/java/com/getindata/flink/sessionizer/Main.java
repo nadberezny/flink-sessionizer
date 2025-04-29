@@ -3,12 +3,12 @@ package com.getindata.flink.sessionizer;
 import com.getindata.flink.sessionizer.config.CDCConfig;
 import com.getindata.flink.sessionizer.config.JobConfig;
 import com.getindata.flink.sessionizer.config.KafkaConfig;
-import com.getindata.flink.sessionizer.function.cdc.AttributedOrderCoProcessor;
 import com.getindata.flink.sessionizer.function.MapToAttributedOrderJson;
 import com.getindata.flink.sessionizer.function.MapToOrderWithAttributedSessions;
 import com.getindata.flink.sessionizer.function.MapToSessionJson;
 import com.getindata.flink.sessionizer.function.SessionElementsAggregateFunction;
 import com.getindata.flink.sessionizer.function.SessionProcessor;
+import com.getindata.flink.sessionizer.function.cdc.AttributedOrderCoProcessor;
 import com.getindata.flink.sessionizer.function.cdc.MapToOrderReturn;
 import com.getindata.flink.sessionizer.model.ClickStreamEvent;
 import com.getindata.flink.sessionizer.model.Key;
@@ -19,11 +19,12 @@ import com.getindata.flink.sessionizer.model.cdc.OrderReturn;
 import com.getindata.flink.sessionizer.serde.output.AttributedOrderJson;
 import com.getindata.flink.sessionizer.serde.output.SessionJson;
 import com.getindata.flink.sessionizer.service.AttributionService;
-import com.getindata.flink.sessionizer.service.ExternalAttributionService;
+import com.getindata.flink.sessionizer.service.ExternalAttributionServiceSupplier;
 import com.getindata.flink.sessionizer.sessionwindow.SessionElementWindowAssigner;
 import com.getindata.flink.sessionizer.sink.KafkaJsonSinkFactory;
 import com.getindata.flink.sessionizer.source.EventKafkaSource;
 import com.typesafe.config.ConfigFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.flink.api.common.eventtime.WatermarkStrategy;
 import org.apache.flink.api.java.functions.KeySelector;
 import org.apache.flink.cdc.connectors.mysql.source.MySqlSource;
@@ -33,21 +34,25 @@ import org.apache.flink.connector.kafka.source.KafkaSource;
 import org.apache.flink.connector.kafka.source.enumerator.initializer.OffsetsInitializer;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
+import org.apache.flink.util.function.SerializableSupplier;
 
 import static com.getindata.flink.sessionizer.commons.Commons.TIME_ZONE;
 
+@Slf4j
 public class Main {
 
     public static void main(String[] args) throws Exception {
         JobConfig config = new JobConfig(ConfigFactory.load());
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
-        buildTopology(config, env, new ExternalAttributionService(config.getAttributionServiceUrl()));
+        buildTopology(config, env, new ExternalAttributionServiceSupplier(config.getAttributionServiceUrl()));
         env.execute();
     }
 
-    public static void buildTopology(JobConfig config, StreamExecutionEnvironment env, AttributionService attributionService) {
+    public static void buildTopology(JobConfig config, StreamExecutionEnvironment env, SerializableSupplier<AttributionService> attributionServiceSupplier) {
         // Source
         KafkaConfig kafkaConfig = config.getKafkaConfig();
+        log.info("Kafka config: {}", kafkaConfig);
+        log.info("Kafka properties: {}", kafkaConfig.getKafkaProperties());
         KafkaSource<ClickStreamEvent> clickStreamKafkaSource = EventKafkaSource.create(
                 kafkaConfig.getBootstrapServers(), kafkaConfig.getKafkaProperties(), kafkaConfig.getClickStreamTopic(), OffsetsInitializer.earliest());
 
@@ -66,7 +71,7 @@ public class Main {
 
         // Attribution
         DataStream<OrderWithAttributedSessions> attributedOrders = orderWithSessions
-                .map(new MapToOrderWithAttributedSessions(() -> attributionService));
+                .map(new MapToOrderWithAttributedSessions(attributionServiceSupplier));
 
         // Sinks
         KafkaSink<SessionJson> sessionsSink = KafkaJsonSinkFactory.create(

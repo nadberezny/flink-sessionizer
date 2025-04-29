@@ -1,5 +1,6 @@
 package com.getindata.flink.sessionizer.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.getindata.flink.sessionizer.model.event.Order;
 import com.getindata.flink.sessionizer.typing.AttributedSessionsTypeInfoFactory;
 import lombok.AllArgsConstructor;
@@ -12,6 +13,7 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class OrderWithAttributedSessions {
 
     private Key userId;
