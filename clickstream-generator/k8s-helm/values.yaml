@@ -1,0 +1,27 @@
+name: data-gen
+namespace: prod
+env: staging
+replicaCount: 1
+restartPolicy: Always
+
+image:
+  repository: TODO
+  pullPolicy: Always
+  tag: latest
+
+imagePullSecrets:
+  name: regcred
+
+isDryRun: false
+frontendId: LoadTest1
+maxActiveUsers: 20
+scheduleUsersInterval: "PT0.5S"
+
+kafka:
+  bootstrapServers: kafka-0.kafka-headless.cluster-services.svc.cluster.local:9092,kafka-1.kafka-headless.cluster-services.svc.cluster.local:9092,kafka-2.kafka-headless.cluster-services.svc.cluster.local:9092
+  outputTopic: events-raw-v2
+
+resources:
+  requests:
+    cpu: 1500m
+    memory: 2Gi

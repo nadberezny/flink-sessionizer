@@ -2,6 +2,7 @@ rootProject.name = 'flink-sessionizer'
 
 include('cdc-evolution')
 include('clickhouse-evolution')
+include('clickstream-generator')
 include('attribution-service')
 include('flink-job')
 

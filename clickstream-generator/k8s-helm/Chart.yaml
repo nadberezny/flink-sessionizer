@@ -1,0 +1,9 @@
+apiVersion: v2
+name: data-gen
+description: A Helm chart for Data Generator
+
+type: application
+
+version: 0.1.0
+
+appVersion: "1.0.0"
