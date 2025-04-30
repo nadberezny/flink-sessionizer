@@ -14,3 +14,9 @@ Please refer to the [Attribution Service README](attribution-service/README.md)
 
 ## CDC Evolution
 A module for applying schema migrations to MySql database. More info in the [README](cdc-evolution/README.md)
+
+## ClickHouse Evolution
+A module for applying schema migrations to ClickHouse database. More info in the [README](clickhouse-evolution/README.md)
+
+## Clickstream generator
+A module for generating clickstream. More info in the [README](clickstream-generator/README.md)
