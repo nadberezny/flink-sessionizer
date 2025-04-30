@@ -17,7 +17,6 @@ String patchVersion = System.getenv('BUILD_NUMBER') ?: '0'
 project.version = "${projectMajorVersion}.${patchVersion}"
 
 repositories {
-    mavenLocal()
     mavenCentral()
     maven {
         url = uri("https://packages.confluent.io/maven")
