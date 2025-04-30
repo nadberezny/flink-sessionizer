@@ -1,8 +1,8 @@
 FROM amazoncorretto:21-alpine-jdk
 
-ADD ./build/install/datagen /app
+ADD ./build/install/clickstream-generator /app
 
 WORKDIR /app
 
-ENTRYPOINT ["./bin/datagen"]
+ENTRYPOINT ["./bin/clickstream-generator"]
 
