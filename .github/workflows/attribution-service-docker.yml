@@ -1,4 +1,4 @@
-name: Build and Push Attribution Service Docker Image
+name: Attribution Service Docker Image
 
 on:
   push:

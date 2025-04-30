@@ -1,4 +1,4 @@
-name: Build and Push Clickhouse Evolution Docker Image
+name: Clickhouse Evolution Docker Image
 
 on:
   push:

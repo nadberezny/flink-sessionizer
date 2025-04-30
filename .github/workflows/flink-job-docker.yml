@@ -1,4 +1,4 @@
-name: Build and Push Flink Job Docker Image
+name: Flink Job Docker Image
 
 on:
   push:

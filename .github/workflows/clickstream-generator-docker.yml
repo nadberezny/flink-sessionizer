@@ -1,4 +1,4 @@
-name: Build and Push Clickstream Generator Docker Image
+name: Clickstream Generator Docker Image
 
 on:
   push:

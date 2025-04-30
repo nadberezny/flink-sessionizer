@@ -1,4 +1,4 @@
-name: Build and Push CDC Evolution Docker Image
+name: CDC Evolution Docker Image
 
 on:
   push:
