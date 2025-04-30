@@ -1,0 +1,90 @@
+plugins {
+    id 'java'
+    id 'application'
+    id 'maven-publish'
+    id "io.freefair.lombok" version "8.6"
+}
+
+group = 'com.getindata.clickhouse'
+version = '1.0-SNAPSHOT'
+
+ext {
+    projectMajorVersion = '0.1'
+    targetDockerImageName = 'nadberezny/flink-sessionizer-liquibase'
+}
+
+String patchVersion = System.getenv('BUILD_NUMBER') ?: '0'
+project.version = "${projectMajorVersion}.${patchVersion}"
+
+repositories {
+    mavenLocal()
+    mavenCentral()
+    maven {
+        url = uri("https://packages.confluent.io/maven")
+    }
+}
+
+application {
+    mainClass = 'com.getindata.clickhouse.evolution.SchemaEvolutionApp'
+    applicationDefaultJvmArgs = ["-Xms256m", "-Xmx512m", "-Dlog4j.configurationFile=log4j2.properties"]
+}
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(21)
+    }
+}
+
+test {
+    useJUnitPlatform()
+
+    testLogging {
+        events "passed"
+    }
+}
+
+tasks.register('dockerBuildAndPushImage', Exec) {
+    String dockerTag = project.hasProperty("dockerTag")
+            ? project.getProperty("dockerTag")
+            : "git rev-parse HEAD".execute().text.trim()
+    String dockerPlatform = project.hasProperty("dockerPlatform")
+            ? project.getProperty("dockerPlatform")
+            : "linux/amd64"
+
+    commandLine 'docker', 'build', '--platform', dockerPlatform, '-t', "$targetDockerImageName:$dockerTag", '--push', "."
+}
+dockerBuildAndPushImage.dependsOn(installDist)
+
+dependencies {
+    // Database
+    implementation 'org.liquibase:liquibase-core:4.26.0'
+    implementation 'com.clickhouse:clickhouse-jdbc:0.5.0'
+    implementation 'io.github.nadberezny:liquibase-clickhouse:0.1.1'
+
+
+    runtimeOnly 'org.lz4:lz4-java:1.8.0' // included in liquibase-clickhouse
+
+    implementation 'org.apache.httpcomponents.client5:httpclient5:5.3.1'
+
+
+    // Externalized config
+    implementation 'com.typesafe:config:1.4.3'
+
+    // Logging
+    implementation platform('org.apache.logging.log4j:log4j-bom:2.23.1')
+    implementation "org.apache.logging.log4j:log4j-slf4j2-impl"
+    implementation "org.apache.logging.log4j:log4j-api"
+    implementation "org.apache.logging.log4j:log4j-core"
+
+    // Testing
+    testImplementation platform('org.junit:junit-bom:5.10.2')
+    testImplementation 'org.junit.jupiter:junit-jupiter'
+    testImplementation platform('org.testcontainers:testcontainers-bom:1.19.7')
+    testImplementation "org.testcontainers:testcontainers"
+    testImplementation "org.testcontainers:junit-jupiter"
+    testImplementation "org.testcontainers:clickhouse"
+    testImplementation "org.testcontainers:kafka:1.20.1"
+    testImplementation "org.apache.kafka:kafka-clients:3.8.0"
+    testImplementation "io.confluent:kafka-avro-serializer:5.3.2"
+    testImplementation group: 'io.confluent', name: 'kafka-schema-registry-client', version: '7.7.0'
+}

@@ -1,0 +1,76 @@
+<?xml version="1.0"?>
+<clickhouse>
+    <!-- Settings profiles -->
+    <profiles>
+        <!-- Default settings. -->
+        <default>
+            <!-- Maximum memory usage for processing single query, in bytes. -->
+            <max_memory_usage>10000000000</max_memory_usage>
+
+            <!-- Use cache of uncompressed blocks of data. Using the uncompressed cache (only for tables in the MergeTree family) can
+            significantly reduce latency and increase throughput when working with a large number of short queries.
+            Meaningful only for processing many of very short queries. -->
+            <use_uncompressed_cache>0</use_uncompressed_cache>
+
+            <!-- Specifies the algorithm of replicas selection that is used for distributed query processing. -->
+            <load_balancing>random</load_balancing>
+
+            <!-- Setting up query logging. Default: Queries are logged in the system.query_log table -->
+            <log_queries>1</log_queries>
+
+            <joined_subquery_requires_alias>0</joined_subquery_requires_alias>
+            <allow_experimental_analyzer>1</allow_experimental_analyzer>
+            <allow_experimental_refreshable_materialized_view>1</allow_experimental_refreshable_materialized_view>
+            <enable_named_columns_in_function_tuple>0</enable_named_columns_in_function_tuple>
+            <distributed_product_mode>allow</distributed_product_mode>
+        </default>
+    </profiles>
+
+
+    <!-- Quotas. -->
+    <quotas>
+        <!-- Name of quota. -->
+        <default>
+            <!-- Limits for time interval. You could specify many intervals with different limits. -->
+            <interval>
+                <!-- Length of interval. -->
+                <duration>3600</duration>
+
+                <!-- No limits. Just calculate resource usage for time interval. -->
+                <queries>0</queries>
+                <errors>0</errors>
+                <result_rows>0</result_rows>
+                <read_rows>0</read_rows>
+                <execution_time>0</execution_time>
+            </interval>
+        </default>
+    </quotas>
+
+
+    <!-- Users and ACL -->
+    <users>
+        <default>
+            <password></password>
+            <!-- open access only from localhost -->
+            <networks>
+                <ip>::/1</ip>
+            </networks>
+            <!-- Settings profile for user. -->
+            <profile>default</profile>
+            <!-- Quota for user. -->
+            <quota>default</quota>
+        </default>
+        <getindata>
+            <password>secure101</password>
+            <!-- open access only from localhost -->
+            <networks>
+                <ip>::/1</ip>
+            </networks>
+            <!-- Settings profile for user. -->
+            <profile>default</profile>
+            <!-- Quota for user. -->
+            <quota>default</quota>
+        </getindata>
+    </users>
+
+</clickhouse>

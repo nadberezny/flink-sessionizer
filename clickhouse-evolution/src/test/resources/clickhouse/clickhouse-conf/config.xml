@@ -1,0 +1,129 @@
+<?xml version="1.0"?>
+<clickhouse>
+    <!-- Reference:  https://clickhouse.com/docs/en/operations/server-configuration-parameters/settings -->
+
+
+    <!-- Logging settings. -->
+    <logger>
+        <!-- Logging level. Acceptable values: trace, debug, information, warning, error. -->
+        <level>information</level>
+        <!-- Send log and errorlog to the console instead of file -->
+        <console>true</console>
+        <!-- Don't generate log file -->
+        <log remove="remove"/>
+        <!-- Don't generate error log file -->
+        <errorlog remove="remove"/>
+    </logger>
+    
+
+    <!-- The hostname that can be used by other servers to access this server.
+        Useful for breaking away from a specific network interface. -->
+    <interserver_http_host from_env="HOST"/>
+    <!-- Port for exchanging data between ClickHouse servers.-->
+    <interserver_http_port>9009</interserver_http_port>
+
+
+    <!-- Configuration of clusters used by the Distributed table engine and by the cluster table function. -->
+    <remote_servers>
+        <getindata-cluster>
+            <!-- Shard 01 -->
+            <shard>
+                <internal_replication>true</internal_replication>
+                <replica>
+                    <host>clickhouse-01</host>
+                    <port>9000</port>
+                </replica>
+                <replica>
+                    <host>clickhouse-02</host>
+                    <port>9000</port>
+                </replica>
+            </shard>
+            <!-- Shard 02 -->
+            <shard>
+                <internal_replication>true</internal_replication>
+                <replica>
+                    <host>clickhouse-03</host>
+                    <port>9000</port>
+                </replica>
+                <replica>
+                    <host>clickhouse-04</host>
+                    <port>9000</port>
+                </replica>
+            </shard>
+        </getindata-cluster>
+    </remote_servers>
+
+    <!-- Contains settings that allow ClickHouse to interact with a ZooKeeper cluster.
+    ClickHouse uses ZooKeeper for storing metadata of replicas when using replicated tables. -->
+    <zookeeper>
+        <node index="1">
+            <host>clickhouse-01</host>
+            <port>2181</port>
+        </node>
+        <node index="2">
+            <host>clickhouse-02</host>
+            <port>2181</port>
+        </node>
+        <node index="3">
+            <host>clickhouse-03</host>
+            <port>2181</port>
+        </node>
+    </zookeeper>
+
+    <!-- ClickHouse Keeper Server Configuration
+    ClickHouse Keeper provides the coordination system for data replication and distributed DDL queries execution
+    It is bundled into the ClickHouse server package, adding <keeper_server> configuration to enable it -->
+    <keeper_server>
+        <!-- Port for a client to connect -->
+        <tcp_port>2181</tcp_port>
+        <!-- Unique server id, each participant of the ClickHouse Keeper cluster must have a unique number (1, 2, 3, and so on). -->
+        <server_id from_env="SERVER_ID" />
+
+        <!-- Internal coordination settings -->
+        <coordination_settings>
+            <!-- Timeout for a single client operation (ms) -->
+            <operation_timeout_ms>10000</operation_timeout_ms>
+            <!-- Max timeout for client session (ms) -->
+            <session_timeout_ms>30000</session_timeout_ms>
+            <!-- Text logging level about coordination -->
+            <raft_logs_level>debug</raft_logs_level>
+        </coordination_settings>
+
+        <!-- Quorum configuration with servers description. -->
+        <raft_configuration>
+            <server>
+                <!-- Server identifier in a quorum. -->
+                <id>1</id>
+                <!-- Hostname where this server is placed. -->
+                <hostname>clickhouse-01</hostname>
+                <!-- Port where this server listens for connections. -->
+                <port>9234</port>
+            </server>
+            <server>
+                <id>2</id>
+                <hostname>clickhouse-02</hostname>
+                <port>9234</port>
+            </server>
+            <server>
+                <id>3</id>
+                <hostname>clickhouse-03</hostname>
+                <port>9234</port>
+            </server>
+            <server>
+                <id>4</id>
+                <hostname>clickhouse-04</hostname>
+                <port>9234</port>
+            </server>
+        </raft_configuration>
+    </keeper_server>
+
+
+    <!-- Parameter substitutions for replicated tables.
+    For more information, see the section https://clickhouse.com/docs/en/engines/table-engines/mergetree-family/replication#creating-replicated-tables. -->
+    <macros>
+        <cluster>getindata-cluster</cluster>
+        <shard from_env="SHARD" />
+        <replica from_env="HOST" />
+    </macros>
+    
+</clickhouse>

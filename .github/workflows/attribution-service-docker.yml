@@ -1,14 +1,19 @@
-name: Build and Push Docker Image
+name: Build and Push Attribution Service Docker Image
 
 on:
   push:
     branches:
       - main
+    paths:
+      - 'attribution-service/**'
   pull_request:
+    paths:
+      - 'attribution-service/**'
+  workflow_dispatch:
 
 env:
   REGISTRY: docker.io
-  IMAGE_NAME: nadberezny/flink-sessionizer
+  IMAGE_NAME: nadberezny/attribution-service
 
 jobs:
   build-and-push:
@@ -31,14 +36,6 @@ jobs:
           username: nadberezny
           password: ${{ secrets.NADBEREZNY_DOCKER_TOKEN }}
 
-      - name: Build and push cdc-evolution image
-        run: |
-          ./gradlew :cdc-evolution:dockerBuildAndPushImage -PdockerPlatform=linux/amd64 -PdockerTag=latest
-
       - name: Build and push attribution-service image
         run: |
           ./gradlew :attribution-service:dockerBuildAndPushImage -PdockerPlatform=linux/amd64 -PdockerTag=latest
-
-      - name: Build and push flink-job image
-        run: |
-          ./gradlew :flink-job:dockerBuildAndPushImage -PdockerPlatform=linux/amd64 -PdockerTag=latest    

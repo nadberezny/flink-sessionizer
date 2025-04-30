@@ -1,0 +1,102 @@
+x-clickhouse-common: &clickhouse-common
+  image: clickhouse/clickhouse-server:24.8
+  depends_on:
+    - kafka
+    - schemaregistry
+  networks:
+    - clickhouse-network
+
+services:
+
+  kafka:
+    image: docker.io/bitnami/kafka:3.4
+    ports:
+      - "9092:9092"
+      - "9093:9093"
+      - "29092:29092"
+    environment:
+      - KAFKA_PROCESS_ROLES=broker,controller
+      - ALLOW_PLAINTEXT_LISTENER=yes
+      - KAFKA_CFG_AUTO_CREATE_TOPICS_ENABLE=true
+      - KAFKA_CFG_NUM_PARTITIONS=4
+      - KAFKA_LISTENERS=PLAINTEXT://0.0.0.0:9092,PLAINTEXT_INTERNAL://0.0.0.0:29092,CONTROLLER://:9093
+      - KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://localhost:9092,PLAINTEXT_INTERNAL://kafka:29092
+      - KAFKA_INTER_BROKER_LISTENER_NAME=PLAINTEXT_INTERNAL
+      - KAFKA_CFG_MESSAGE_MAX_BYTES=1048588
+      - KAFKA_CONTROLLER_LISTENER_NAMES=CONTROLLER
+      - KAFKA_LISTENER_SECURITY_PROTOCOL_MAP=PLAINTEXT:PLAINTEXT,PLAINTEXT_INTERNAL:PLAINTEXT,CONTROLLER:PLAINTEXT
+      - KAFKA_CFG_CONTROLLER_LISTENER_NAMES=CONTROLLER
+      # KRaft settings
+      - KAFKA_CFG_NODE_ID=0
+      - KAFKA_CFG_PROCESS_ROLES=controller,broker
+      - KAFKA_CFG_CONTROLLER_QUORUM_VOTERS=0@localhost:9093
+    networks:
+      clickhouse-network:
+
+  schemaregistry:
+    image: confluentinc/cp-schema-registry:7.5.0
+    depends_on:
+      - kafka
+    environment:
+      SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: "PLAINTEXT://kafka:29092"
+      SCHEMA_REGISTRY_HOST_NAME: "localhost"
+      SCHEMA_REGISTRY_LISTENERS: "http://0.0.0.0:8081"
+    ports:
+      - 8081:8081
+    networks:
+      clickhouse-network:
+
+  clickhouse-01:
+    <<: *clickhouse-common
+    ports:
+      - "18123:8123"
+      - "9000:9000"
+    volumes:
+      - ./clickhouse-conf/config.xml:/etc/clickhouse-server/config.d/config.xml
+      - ./clickhouse-conf/users.xml:/etc/clickhouse-server/users.d/users.xml
+    environment:
+      - SHARD=01
+      - HOST=clickhouse-01
+      - SERVER_ID=1
+
+  clickhouse-02:
+    <<: *clickhouse-common
+    ports:
+      - "18124:8123"
+      - "9001:9000"
+    volumes:
+      - ./clickhouse-conf/config.xml:/etc/clickhouse-server/config.d/config.xml
+      - ./clickhouse-conf/users.xml:/etc/clickhouse-server/users.d/users.xml
+    environment:
+      - SHARD=01
+      - HOST=clickhouse-02
+      - SERVER_ID=2
+
+  clickhouse-03:
+    <<: *clickhouse-common
+    ports:
+      - "18125:8123"
+      - "9002:9000"
+    volumes:
+      - ./clickhouse-conf/config.xml:/etc/clickhouse-server/config.d/config.xml
+      - ./clickhouse-conf/users.xml:/etc/clickhouse-server/users.d/users.xml
+    environment:
+      - SHARD=02
+      - HOST=clickhouse-03
+      - SERVER_ID=3
+
+  clickhouse-04:
+    <<: *clickhouse-common
+    ports:
+      - "18126:8123"
+      - "9003:9000"
+    volumes:
+      - ./clickhouse-conf/config.xml:/etc/clickhouse-server/config.d/config.xml
+      - ./clickhouse-conf/users.xml:/etc/clickhouse-server/users.d/users.xml
+    environment:
+      - SHARD=02
+      - HOST=clickhouse-04
+      - SERVER_ID=4
+
+networks:
+  clickhouse-network:
