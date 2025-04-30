@@ -1,7 +1,7 @@
-# Flink Sessionizer
+# Streaming Demo Apps
 
-A streaming application that processes clickstream data and creates user sessions using Apache Flink. The project
-consists of multiple modules including clickstream generation, CDC evolution handling, and attribution services.
+A monorepo for applications used in [streaming-demo-platform](https://github.com/getindata/streaming-demo-platform). The project
+consists of multiple modules including flink job, clickstream generation, db schema evolution handling, and attribution services.
 
 ## Flink Job
 

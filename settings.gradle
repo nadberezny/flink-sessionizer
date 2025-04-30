@@ -1,4 +1,4 @@
-rootProject.name = 'flink-sessionizer'
+rootProject.name = 'streaming-demo-apps'
 
 include('cdc-evolution')
 include('clickhouse-evolution')
