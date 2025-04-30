@@ -1,7 +1,7 @@
 resource "helm_release" "data_gen" {
   chart            = "application"
   repository       = "https://stakater.github.io/stakater-charts"
-  name             = "dema-data-gen"
+  name             = "data-gen"
   namespace        = local.namespace_applications
   create_namespace = true
   recreate_pods    = true
@@ -14,7 +14,7 @@ resource "helm_release" "data_gen" {
 
   set {
     name  = "applicationName"
-    value = "dema-data-gen"
+    value = "data-gen"
   }
 
   set {

@@ -1,5 +1,5 @@
 # Streaming K8s dev infra
-Create local k8s cluster, install infrastructure on top of it and deploy dema.ai streaming job.
+Create local k8s cluster, install infrastructure on top of it and deploy streaming job.
 
 ## Infrastructure overview:
 We are using [k3d](https://k3d.io/v5.4.9/) as a wrapper for k3s K8s distribution. 

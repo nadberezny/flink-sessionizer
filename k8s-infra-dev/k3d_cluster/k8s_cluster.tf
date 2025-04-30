@@ -23,10 +23,6 @@ registries:
   create:
     name: flink
     hostPort: "12345"
-  mirrors:
-    dema.ai:
-      endpoint:
-        - "https://783764582626.dkr.ecr.eu-west-1.amazonaws.com"
 options:
   kubeconfig:
     updateDefaultKubeconfig: true
