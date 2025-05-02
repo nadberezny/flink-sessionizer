@@ -24,9 +24,11 @@ import static com.getindata.sessionizer.datagen.Main.producer;
 @Slf4j
 class User implements Runnable {
 
-    public static final List<String> availableChannels = List.of("Facebook", "Google", "Unknown", "CampaignA", "CampaignB");
+    public static final List<String> availableFacebookCampaigns = List.of("Campaign Fb A", "Campaign Fb B");
 
-    private final int channelsSize = availableChannels.size();
+    public static final List<String> availableGoogleCampaigns = List.of("Campaign G A", "Campaign G B", "Campaign G C");
+
+    public static final List<String> availableUnknownCampaigns = List.of();
 
     private final UniformRandomProvider rng = RandomSource.XO_RO_SHI_RO_128_PP.create();
 
@@ -123,20 +125,56 @@ class User implements Runnable {
         return new Event(null, order, visitorId.toString(), "pageview", eventKey.frontendId(), "trackedBy", "source", createdAt);
     }
 
-    @SneakyThrows // TODO
+    @SneakyThrows
     private Event generatePageViewEvent() {
         log.atLevel(logLevel).log("Sending pageview {}", id);
         var now = Instant.now();
         var createdAt = now.toString();
+
+        String channel = generateChannel();
+        String campaign = generateCampaign(channel);
+
         var pageView = new PageView(
-                visitorId.toString(), null, "https://loadtest.se", generateChannel(now.toEpochMilli()), null, null, null, "PL", "userAgent", "ip", null
+                visitorId.toString(), null, "https://loadtest.se", channel, null, campaign, null, "PL", "userAgent", "ip", null
         );
 
         return new Event(pageView, null, visitorId.toString(), "pageview", eventKey.frontendId(), "trackedBy", "source", createdAt);
     }
 
-    private String generateChannel(long valueUnderModulo) {
-        int index = (int) (valueUnderModulo % channelsSize);
-        return availableChannels.get(index);
+    private String generateChannel() {
+        int randomValue = rng.nextInt(1, 101);
+
+        if (randomValue <= 30) {
+            return "Facebook";
+        } else if (randomValue <= 85) {
+            return "Google";
+        } else {
+            return "Unknown";  // 15% probability
+        }
+    }
+
+    private String generateCampaign(String channel) {
+        List<String> campaigns;
+
+        switch (channel) {
+            case "Facebook":
+                campaigns = availableFacebookCampaigns;
+                break;
+            case "Google":
+                campaigns = availableGoogleCampaigns;
+                break;
+            case "Unknown":
+                campaigns = availableUnknownCampaigns;
+                break;
+            default:
+                return null;
+        }
+
+        if (campaigns.isEmpty()) {
+            return null;
+        }
+
+        int index = rng.nextInt(campaigns.size());
+        return campaigns.get(index);
     }
 }
