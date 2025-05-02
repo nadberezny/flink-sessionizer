@@ -14,5 +14,7 @@ public class PageView {
 
     private MarketingChannel marketingChannel;
 
+    private String campaign;
+
     private String landingPage;
 }

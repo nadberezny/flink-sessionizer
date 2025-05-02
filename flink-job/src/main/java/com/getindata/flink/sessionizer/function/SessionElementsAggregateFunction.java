@@ -70,6 +70,7 @@ public class SessionElementsAggregateFunction implements AggregateFunction<Click
                         .withPageViewCount(accumulator.getPageViewsCount())
                         .withDurationMillis(getDurationMillis(accumulator))
                         .withMarketingChannel(firstPageView.getMarketingChannel())
+                        .withCampaign(firstPageView.getCampaign())
                         .withLandingPage(firstPageView.getLandingPage());
 
             }

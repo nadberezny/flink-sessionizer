@@ -28,6 +28,7 @@ public class MapToClickStreamEvent implements MapFunction<ClickStreamEventJson, 
             pageView = new PageView(
                     id.toString(),
                     new MarketingChannel(inputPv.getChannel()),
+                    inputPv.getCampaign(),
                     inputPv.getUrl());
         } else {
             pageView = null;

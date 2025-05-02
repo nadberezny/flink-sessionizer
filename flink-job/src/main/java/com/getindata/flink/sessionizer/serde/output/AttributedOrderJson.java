@@ -12,6 +12,7 @@ public class AttributedOrderJson {
     private String sessionId;
     private String userId;
     private String marketingChannel;
+    private String campaign;
     private long timestamp;
     private long returnTimestamp;
     private int pageViewCount;

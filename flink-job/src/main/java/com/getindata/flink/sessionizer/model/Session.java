@@ -22,6 +22,7 @@ public final class Session {
     private int pageViewCount;
     private long durationMillis;
     private MarketingChannel marketingChannel;
+    private String campaign;
     private String landingPage;
     private ClickStreamEvent lastEvent;
 

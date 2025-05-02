@@ -29,7 +29,7 @@ public class MainIntegrationTest {
         var t1 = Instant.parse("2025-04-09T00:00:00Z");
         var t2 = Instant.parse("2025-04-09T01:00:00Z");
         var pv1 = new ClickStreamEventJson(
-                new PageView(user1, null, "https://mystore.com", "ChannelA", null, null, null, null, null, "ip1", null),
+                new PageView(user1, null, "https://mystore.com", "ChannelA", null, "CampaignA", null, null, null, "ip1", null),
                 null, key1, "pageview", "frontend1", "n/a", "n/a", t1.toString()
         );
 //        var pv2 = new ClickStreamEvent(
@@ -51,11 +51,16 @@ public class MainIntegrationTest {
         given().ignoreExceptions().atMost(Duration.ofMinutes(3)).await().until(() -> {
             var records = ctx.getSessionsConsumer().poll(Duration.ofMillis(500));
             assertThat(records).hasSize(1);
+            records.forEach(record -> assertThat(record.value().getCampaign()).isEqualTo("CampaignA"));
             return true;
         });
 
         given().ignoreExceptions().atMost(Duration.ofMinutes(3)).await().until(() -> {
             var records = ctx.getOrderWithSessionsConsumer().poll(Duration.ofMillis(500));
+            records.forEach(record -> {
+                assertThat(record.value().getOrderId()).isEqualTo(order1Id);
+                assertThat(record.value().getCampaign()).isEqualTo("CampaignA");
+            });
             assertThat(records).hasSize(1);
             return true;
         });

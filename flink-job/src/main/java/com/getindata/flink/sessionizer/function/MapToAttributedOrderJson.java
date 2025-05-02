@@ -18,6 +18,7 @@ public class MapToAttributedOrderJson implements MapFunction<OrderWithAttributed
         Optional<AttributedSession> lastSession = getLastSession(ows);
         String sessionId = lastSession.map(AttributedSession::getSession).map(Session::getId).orElse(UUID.randomUUID().toString());
         String marketingChannel = lastSession.map(AttributedSession::getSession).map(Session::getMarketingChannel).map(MarketingChannel::getName).orElse("");
+        String campaign = lastSession.map(AttributedSession::getSession).map(Session::getCampaign).orElse("");
         int pageViewCount = lastSession.map(AttributedSession::getSession).map(Session::getPageViewCount).orElse(0);
         int durationMillis = lastSession.map(AttributedSession::getSession).map(Session::getDurationMillis).orElse(0L).intValue();
         int weight = lastSession.map(AttributedSession::getWeight).orElse(0f).intValue();
@@ -29,6 +30,7 @@ public class MapToAttributedOrderJson implements MapFunction<OrderWithAttributed
                 sessionId,
                 ows.getUserId().getValue(),
                 marketingChannel,
+                campaign,
                 ows.getTimestamp(),
                 returnTimestamp,
                 pageViewCount,

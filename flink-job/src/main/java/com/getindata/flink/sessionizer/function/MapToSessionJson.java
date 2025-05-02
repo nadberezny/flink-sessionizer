@@ -13,6 +13,7 @@ public class MapToSessionJson implements MapFunction<Session, SessionJson> {
                 session.getId(),
                 session.getUserId().getValue(),
                 session.getMarketingChannel().getName(),
+                session.getCampaign(),
                 session.getTimestamp(),
                 session.getPageViewCount(),
                 (int) session.getDurationMillis());

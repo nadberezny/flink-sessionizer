@@ -11,6 +11,7 @@ public class SessionJson {
     private String sessionId;
     private String userId;
     private String marketingChannel;
+    private String campaign;
     private long timestamp;
     private int pageViewCount;
     private int durationMillis;
