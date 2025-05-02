@@ -69,6 +69,7 @@ public class SessionElementsAggregateFunction implements AggregateFunction<Click
                         .withWindowTo(lastEvent.getTimestamp() + sessionTimeout)
                         .withPageViewCount(accumulator.getPageViewsCount())
                         .withDurationMillis(getDurationMillis(accumulator))
+                        .withDurationMillisDelta(getDurationMillisDelta(accumulator))
                         .withMarketingChannel(firstPageView.getMarketingChannel())
                         .withCampaign(firstPageView.getCampaign())
                         .withLandingPage(firstPageView.getLandingPage());
@@ -103,6 +104,13 @@ public class SessionElementsAggregateFunction implements AggregateFunction<Click
     private long getDurationMillis(SessionWindowAccumulator accumulator) {
         if (accumulator.firstEvent() != null) {
             return accumulator.lastEvent().getTimestamp() - accumulator.firstEvent().getTimestamp();
+        }
+        return 0;
+    }
+
+    private long getDurationMillisDelta(SessionWindowAccumulator accumulator) {
+        if (accumulator.secondLastEvent().isPresent()) {
+            return accumulator.lastEvent().getTimestamp() - accumulator.secondLastEvent().get().getTimestamp();
         }
         return 0;
     }

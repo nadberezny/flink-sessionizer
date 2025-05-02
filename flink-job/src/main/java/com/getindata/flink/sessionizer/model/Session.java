@@ -21,6 +21,7 @@ public final class Session {
     private long windowTo;
     private int pageViewCount;
     private long durationMillis;
+    private long durationMillisDelta;
     private MarketingChannel marketingChannel;
     private String campaign;
     private String landingPage;
