@@ -4,7 +4,7 @@
 --changeset baseline:000
 CREATE USER '${cdc.user}'@'%' IDENTIFIED WITH mysql_native_password BY '${cdc.password}';
 GRANT REPLICATION SLAVE, REPLICATION CLIENT ON *.* TO '${cdc.user}'@'%';
-GRANT SELECT, RELOAD, SHOW DATABASES, LOCK TABLES ON *.* TO '${cdc.user}'@'%';
+GRANT SELECT, INSERT, UPDATE, DELETE, RELOAD, SHOW DATABASES, LOCK TABLES ON *.* TO '${cdc.user}'@'%';
 FLUSH PRIVILEGES;
 
 CREATE DATABASE IF NOT EXISTS ${cdc.database};
