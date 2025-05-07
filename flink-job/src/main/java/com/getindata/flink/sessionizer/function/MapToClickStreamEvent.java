@@ -5,6 +5,7 @@ import com.getindata.flink.sessionizer.model.Key;
 import com.getindata.flink.sessionizer.model.MarketingChannel;
 import com.getindata.flink.sessionizer.model.event.Order;
 import com.getindata.flink.sessionizer.model.event.PageView;
+import com.getindata.flink.sessionizer.model.event.Product;
 import com.getindata.flink.sessionizer.serde.input.ClickStreamEventJson;
 import com.getindata.flink.sessionizer.util.HashingUtility;
 import org.apache.flink.api.common.functions.MapFunction;
@@ -14,6 +15,7 @@ import java.math.BigInteger;
 import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 public class MapToClickStreamEvent implements MapFunction<ClickStreamEventJson, ClickStreamEvent> {
 
@@ -45,7 +47,8 @@ public class MapToClickStreamEvent implements MapFunction<ClickStreamEventJson, 
                     timestamp,
                     toFloatMonetary(input.getOrder().getTotal()),
                     toFloatMonetary(input.getOrder().getShipping()),
-                    null);
+                    null,
+                    toProducts(input.getOrder().getProducts()));
         } else {
             order = null;
         }
@@ -63,5 +66,15 @@ public class MapToClickStreamEvent implements MapFunction<ClickStreamEventJson, 
         return new BigDecimal(value)
                 .divide(monetaryFactor, 4, BigDecimal.ROUND_HALF_UP)
                 .floatValue();
+    }
+
+    private List<Product> toProducts(List<com.getindata.flink.sessionizer.serde.input.Product> products) {
+        return products.stream()
+                .map(p -> new Product(
+                        p.getProductId(),
+                        p.getName(),
+                        toFloatMonetary(p.getPrice()),
+                        p.getQuantity().intValue()
+                )).collect(Collectors.toList());
     }
 }

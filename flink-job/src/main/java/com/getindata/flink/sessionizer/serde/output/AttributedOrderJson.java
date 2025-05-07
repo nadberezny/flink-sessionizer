@@ -20,4 +20,8 @@ public class AttributedOrderJson {
     private float total;
     private float shipping;
     private int weight;
+    private String productId;
+    private String productName;
+    private float productPrice;
+    private int productQuantity;
 }

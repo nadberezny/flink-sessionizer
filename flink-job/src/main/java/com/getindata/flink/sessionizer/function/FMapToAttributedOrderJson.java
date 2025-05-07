@@ -6,15 +6,16 @@ import com.getindata.flink.sessionizer.model.OrderWithAttributedSessions;
 import com.getindata.flink.sessionizer.model.Session;
 import com.getindata.flink.sessionizer.model.event.Order;
 import com.getindata.flink.sessionizer.serde.output.AttributedOrderJson;
-import org.apache.flink.api.common.functions.MapFunction;
+import org.apache.flink.api.common.functions.FlatMapFunction;
+import org.apache.flink.util.Collector;
 
 import java.util.Optional;
 import java.util.UUID;
 
-public class MapToAttributedOrderJson implements MapFunction<OrderWithAttributedSessions, AttributedOrderJson> {
+public class FMapToAttributedOrderJson implements FlatMapFunction<OrderWithAttributedSessions, AttributedOrderJson> {
 
     @Override
-    public AttributedOrderJson map(OrderWithAttributedSessions ows) throws Exception {
+    public void flatMap(OrderWithAttributedSessions ows, Collector<AttributedOrderJson> out) throws Exception {
         Optional<AttributedSession> lastSession = getLastSession(ows);
         String sessionId = lastSession.map(AttributedSession::getSession).map(Session::getId).orElse(UUID.randomUUID().toString());
         String marketingChannel = lastSession.map(AttributedSession::getSession).map(Session::getMarketingChannel).map(MarketingChannel::getName).orElse("");
@@ -25,22 +26,27 @@ public class MapToAttributedOrderJson implements MapFunction<OrderWithAttributed
         Order order = ows.getOrder();
         long returnTimestamp = order.getReturnedTimestamp() == null ? 0 : order.getReturnedTimestamp();
 
-        return new AttributedOrderJson(
-                order.getId(),
-                sessionId,
-                ows.getUserId().getValue(),
-                marketingChannel,
-                campaign,
-                ows.getTimestamp(),
-                returnTimestamp,
-                pageViewCount,
-                durationMillis,
-                order.getTotal(),
-                order.getShipping(),
-                weight
+        order.getProducts().forEach(product ->
+                out.collect(new AttributedOrderJson(
+                        order.getId(),
+                        sessionId,
+                        ows.getUserId().getValue(),
+                        marketingChannel,
+                        campaign,
+                        ows.getTimestamp(),
+                        returnTimestamp,
+                        pageViewCount,
+                        durationMillis,
+                        order.getTotal(),
+                        order.getShipping(),
+                        weight,
+                        product.getId(),
+                        product.getName(),
+                        product.getPrice(),
+                        product.getQuantity()
+                ))
         );
     }
-
     private Optional<AttributedSession> getLastSession(OrderWithAttributedSessions ows) {
         return ows.getSessions().stream()
                 .reduce((first, second) -> second); // Finds the last element

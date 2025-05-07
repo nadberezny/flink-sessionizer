@@ -4,6 +4,7 @@ import com.getindata.flink.sessionizer.model.cdc.OrderReturn;
 import com.getindata.flink.sessionizer.serde.input.ClickStreamEventJson;
 import com.getindata.flink.sessionizer.serde.input.Order;
 import com.getindata.flink.sessionizer.serde.input.PageView;
+import com.getindata.flink.sessionizer.serde.input.Product;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -11,6 +12,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import java.math.BigInteger;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static com.getindata.flink.sessionizer.IntegrationTestExtension.clickStreamTopic;
@@ -43,7 +45,8 @@ public class MainIntegrationTest {
                 new PageView(user1, null, "https://mystore.com", "ChannelA", null, "CampaignA", null, null, null, "ip1", null),
                 null, key1, "pageview", "frontend1", "n/a", "n/a", t3.toString()
         );
-        var order1 = new ClickStreamEventJson(null, new Order(user1, order1Id, null, null, null, BigInteger.valueOf(1000000), null, BigInteger.valueOf(200000), null, null, null, null, null, null),
+        var order1 = new ClickStreamEventJson(null, new Order(user1, order1Id, null, null, null, BigInteger.valueOf(1000000), null, BigInteger.valueOf(200000), null,
+                List.of(new Product("product1", "product1", "product1", "product1", BigInteger.valueOf(1000000), "PLN", List.of(), 1L)), null, null, null, null),
                 key1, "order", "frontend1", "n/a", "n/a", t4.toString());
 
         // when
@@ -124,8 +127,10 @@ public class MainIntegrationTest {
         given().ignoreExceptions().atMost(Duration.ofMinutes(3)).await().until(() -> {
             var records = ctx.getOrderWithSessionsConsumer().poll(Duration.ofMillis(500));
             assertThat(records).hasSize(1);
-            records.forEach(record ->
-                    assertThat(record.value().getReturnTimestamp()).isEqualTo(order1ReturnTimestamp.toEpochMilli())
+            records.forEach(record -> {
+                        assertThat(record.value().getReturnTimestamp()).isEqualTo(order1ReturnTimestamp.toEpochMilli());
+                        assertThat(record.value().getProductPrice()).isEqualTo(100f);
+                    }
             );
             return true;
         });

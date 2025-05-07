@@ -3,7 +3,7 @@ package com.getindata.flink.sessionizer;
 import com.getindata.flink.sessionizer.config.CDCConfig;
 import com.getindata.flink.sessionizer.config.JobConfig;
 import com.getindata.flink.sessionizer.config.KafkaConfig;
-import com.getindata.flink.sessionizer.function.MapToAttributedOrderJson;
+import com.getindata.flink.sessionizer.function.FMapToAttributedOrderJson;
 import com.getindata.flink.sessionizer.function.MapToOrderWithAttributedSessions;
 import com.getindata.flink.sessionizer.function.MapToSessionJson;
 import com.getindata.flink.sessionizer.function.SessionElementsAggregateFunction;
@@ -94,7 +94,7 @@ public class Main {
                 .sinkTo(sessionsSink);
 
         attributedOrders
-                .map(new MapToAttributedOrderJson())
+                .flatMap(new FMapToAttributedOrderJson())
                 .sinkTo(attributedOrdersSink);
 
         // CDC
@@ -125,7 +125,7 @@ public class Main {
                 .process(new AttributedOrderCoProcessor(cdcConfig.getStateTTL()));
 
         returnedAttributedOrder
-                .map(new MapToAttributedOrderJson())
+                .flatMap(new FMapToAttributedOrderJson())
                 .sinkTo(attributedOrdersSink);
     }
 }
