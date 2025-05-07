@@ -1,5 +1,6 @@
 package com.getindata.sessionizer.datagen.generators;
 
+import com.getindata.sessionizer.datagen.commons.Commons;
 import com.getindata.sessionizer.datagen.serde.kafka.Product;
 import com.github.javafaker.Faker;
 
@@ -13,7 +14,7 @@ public class ProductGenerator {
         String productName = faker.options().option(availableProductNames);
         String color = faker.commerce().color();
         String id = productName + ":" + color;
-        BigInteger price = new BigDecimal(faker.commerce().price(50, 150)).multiply(new BigDecimal(1000000)).toBigInteger();
+        BigInteger price = new BigDecimal(faker.commerce().price(50, 150)).multiply(Commons.monetaryFactor).toBigInteger();
         Product product = new Product(
                 id,
                 id,

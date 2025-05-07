@@ -43,7 +43,7 @@ public class MainIntegrationTest {
                 new PageView(user1, null, "https://mystore.com", "ChannelA", null, "CampaignA", null, null, null, "ip1", null),
                 null, key1, "pageview", "frontend1", "n/a", "n/a", t3.toString()
         );
-        var order1 = new ClickStreamEventJson(null, new Order(user1, order1Id, null, null, null, BigInteger.valueOf(100), null, BigInteger.valueOf(20), null, null, null, null, null, null),
+        var order1 = new ClickStreamEventJson(null, new Order(user1, order1Id, null, null, null, BigInteger.valueOf(1000000), null, BigInteger.valueOf(200000), null, null, null, null, null, null),
                 key1, "order", "frontend1", "n/a", "n/a", t4.toString());
 
         // when
@@ -111,6 +111,10 @@ public class MainIntegrationTest {
                 assertThat(record.value().getCampaign()).isEqualTo("CampaignA");
             });
             assertThat(records).hasSize(1);
+            records.forEach(record -> {
+                assertThat(record.value().getTotal()).isEqualTo(100f);
+                assertThat(record.value().getShipping()).isEqualTo(20f);
+            });
             return true;
         });
 

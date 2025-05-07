@@ -9,11 +9,15 @@ import com.getindata.flink.sessionizer.serde.input.ClickStreamEventJson;
 import com.getindata.flink.sessionizer.util.HashingUtility;
 import org.apache.flink.api.common.functions.MapFunction;
 
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
 public class MapToClickStreamEvent implements MapFunction<ClickStreamEventJson, ClickStreamEvent> {
+
+    public static final BigDecimal monetaryFactor = BigDecimal.valueOf(10000);
 
     @Override
     public ClickStreamEvent map(ClickStreamEventJson input) {
@@ -39,8 +43,8 @@ public class MapToClickStreamEvent implements MapFunction<ClickStreamEventJson, 
             order = new Order(
                     input.getOrder().getOrderId(),
                     timestamp,
-                    input.getOrder().getTotal().floatValue(),
-                    input.getOrder().getShipping().floatValue(),
+                    toFloatMonetary(input.getOrder().getTotal()),
+                    toFloatMonetary(input.getOrder().getShipping()),
                     null);
         } else {
             order = null;
@@ -53,5 +57,11 @@ public class MapToClickStreamEvent implements MapFunction<ClickStreamEventJson, 
                 pageView,
                 order
         );
+    }
+    
+    private float toFloatMonetary(BigInteger value) {
+        return new BigDecimal(value)
+                .divide(monetaryFactor, 4, BigDecimal.ROUND_HALF_UP)
+                .floatValue();
     }
 }
