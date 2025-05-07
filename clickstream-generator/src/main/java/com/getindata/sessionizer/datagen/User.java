@@ -1,21 +1,20 @@
 package com.getindata.sessionizer.datagen;
 
+import com.getindata.sessionizer.datagen.generators.OrderGenerator;
 import com.getindata.sessionizer.datagen.serde.kafka.Event;
 import com.getindata.sessionizer.datagen.serde.kafka.EventKey;
-import com.getindata.sessionizer.datagen.serde.kafka.Order;
 import com.getindata.sessionizer.datagen.serde.kafka.PageView;
-import com.getindata.sessionizer.datagen.serde.kafka.Product;
-import com.getindata.sessionizer.datagen.serde.kafka.Voucher;
+import com.github.javafaker.Faker;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.rng.UniformRandomProvider;
 import org.apache.commons.rng.simple.RandomSource;
 import org.slf4j.event.Level;
 
-import java.math.BigInteger;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
+import java.util.Random;
 import java.util.UUID;
 
 import static com.getindata.sessionizer.datagen.Main.appConfig;
@@ -48,7 +47,9 @@ class User implements Runnable {
 
     private long sessionDurationLeftMs;
 
-    public User(String id, UserBucket bucket, boolean isDryRun) {
+    private OrderGenerator orderGenerator;
+
+    public User(String id, UserBucket bucket, boolean isDryRun, OrderGenerator orderGenerator) {
         this.id = id;
         this.bucket = bucket;
         this.isDryRun = isDryRun;
@@ -56,6 +57,7 @@ class User implements Runnable {
         this.sessionDurationLeftMs = calculateSessionDuration().toMillis();
         this.visitorId = UUID.randomUUID();
         this.eventKey = new EventKey(appConfig.frontendId, visitorId.toString());
+        this.orderGenerator = orderGenerator;
     }
 
     @SneakyThrows // TODO
@@ -116,12 +118,8 @@ class User implements Runnable {
         log.atLevel(logLevel).log("Sending order {}", id);
         var createdAt = Instant.now().toString();
         var orderId = id + createdAt;
-        var TODO = new BigInteger("1");
-        List<Product> products = List.of(
-                new Product("id", "variantNo", "productId", "productName", TODO, "SEK", List.of(), 1L)
-        );
-        List<Voucher> vouchers = List.of();
-        var order = new Order(visitorId.toString(), orderId, "ip", "PL", "userAgent", TODO, TODO, TODO, "PLN", products, TODO, vouchers, TODO, "paymentMethod");
+        var faker = new Faker(new Random(visitorId.getMostSignificantBits()));
+        var order = orderGenerator.generate(visitorId, orderId, "PLN", faker);
         return new Event(null, order, visitorId.toString(), "pageview", eventKey.frontendId(), "trackedBy", "source", createdAt);
     }
 

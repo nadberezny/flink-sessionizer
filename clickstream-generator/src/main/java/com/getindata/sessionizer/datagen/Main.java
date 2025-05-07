@@ -1,6 +1,7 @@
 package com.getindata.sessionizer.datagen;
 
 import com.getindata.sessionizer.datagen.conf.ProducerType;
+import com.getindata.sessionizer.datagen.generators.OrderGenerator;
 import com.getindata.sessionizer.datagen.producer.KafkaProducer;
 import com.getindata.sessionizer.datagen.producer.Producer;
 import com.getindata.sessionizer.datagen.producer.TrackeriTwoProducer;
@@ -23,7 +24,7 @@ public class Main {
 
     public static void main(String[] args) {
         setup();
-        scheduleUsers();
+        scheduleUsers(new OrderGenerator());
     }
 
     private static void setup() {
@@ -39,14 +40,14 @@ public class Main {
         }
     }
 
-    private static void scheduleUsers() {
+    private static void scheduleUsers(OrderGenerator orderGenerator) {
         long scheduleUsersIntervalMs = appConfig.scheduleUsersInterval.toMillis();
         new UserBuckets(appConfig.maxActiveUsers)
                 .toList()
                 .parallelStream()
                 .forEach(userBucket ->
                         scheduledExecutor.scheduleWithFixedDelay(
-                                new UserScheduler(userBucket, appConfig.isDryRun), scheduleUsersIntervalMs, scheduleUsersIntervalMs, TimeUnit.MILLISECONDS
+                                new UserScheduler(userBucket, appConfig.isDryRun, orderGenerator), scheduleUsersIntervalMs, scheduleUsersIntervalMs, TimeUnit.MILLISECONDS
                         )
                 );
     }
