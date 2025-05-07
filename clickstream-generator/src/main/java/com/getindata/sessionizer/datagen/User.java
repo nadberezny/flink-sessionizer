@@ -138,12 +138,12 @@ class User implements Runnable {
     private String generateChannel() {
         int randomValue = rng.nextInt(1, 101);
 
-        if (randomValue <= 30) {
+        if (randomValue <= 35) {
             return "Facebook";
         } else if (randomValue <= 85) {
             return "Google";
         } else {
-            return "Unknown";  // 15% probability
+            return "Unknown";
         }
     }
 
