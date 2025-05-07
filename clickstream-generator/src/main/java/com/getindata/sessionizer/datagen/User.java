@@ -1,6 +1,7 @@
 package com.getindata.sessionizer.datagen;
 
 import com.getindata.sessionizer.datagen.generators.OrderGenerator;
+import com.getindata.sessionizer.datagen.generators.PageViewGenerator;
 import com.getindata.sessionizer.datagen.serde.kafka.Event;
 import com.getindata.sessionizer.datagen.serde.kafka.EventKey;
 import com.getindata.sessionizer.datagen.serde.kafka.PageView;
@@ -48,6 +49,7 @@ class User implements Runnable {
     private long sessionDurationLeftMs;
 
     private OrderGenerator orderGenerator;
+    private PageViewGenerator pageViewGenerator;
 
     public User(String id, UserBucket bucket, boolean isDryRun, OrderGenerator orderGenerator) {
         this.id = id;
@@ -58,6 +60,7 @@ class User implements Runnable {
         this.visitorId = UUID.randomUUID();
         this.eventKey = new EventKey(appConfig.frontendId, visitorId.toString());
         this.orderGenerator = orderGenerator;
+        this.pageViewGenerator = new PageViewGenerator();
     }
 
     @SneakyThrows // TODO
@@ -131,10 +134,9 @@ class User implements Runnable {
 
         String channel = generateChannel();
         String campaign = generateCampaign(channel);
+        var faker = new Faker(new Random(visitorId.getMostSignificantBits()));
 
-        var pageView = new PageView(
-                visitorId.toString(), null, "https://loadtest.se", channel, null, campaign, null, "PL", "userAgent", "ip", null
-        );
+        var pageView = pageViewGenerator.generate(visitorId, null, channel, null, campaign, faker);
 
         return new Event(pageView, null, visitorId.toString(), "pageview", eventKey.frontendId(), "trackedBy", "source", createdAt);
     }
