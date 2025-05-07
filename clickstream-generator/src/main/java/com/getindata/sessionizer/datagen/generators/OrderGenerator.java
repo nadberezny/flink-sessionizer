@@ -16,7 +16,7 @@ public class OrderGenerator {
 
     public OrderGenerator() {
         Faker faker = new Faker();
-        int maxProductNumber = 150;
+        int maxProductNumber = 50;
         HashSet<String> distinctProductNames = new HashSet<>();
         IntStream.range(0, maxProductNumber).forEach(i -> {
             distinctProductNames.add(faker.commerce().productName());
