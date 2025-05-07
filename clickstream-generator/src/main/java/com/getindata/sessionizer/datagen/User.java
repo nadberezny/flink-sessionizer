@@ -4,7 +4,6 @@ import com.getindata.sessionizer.datagen.generators.OrderGenerator;
 import com.getindata.sessionizer.datagen.generators.PageViewGenerator;
 import com.getindata.sessionizer.datagen.serde.kafka.Event;
 import com.getindata.sessionizer.datagen.serde.kafka.EventKey;
-import com.getindata.sessionizer.datagen.serde.kafka.PageView;
 import com.github.javafaker.Faker;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -23,11 +22,6 @@ import static com.getindata.sessionizer.datagen.Main.producer;
 
 @Slf4j
 class User implements Runnable {
-
-    public static final List<String> availableFacebookCampaigns = List.of("Campaign Fb A", "Campaign Fb B");
-
-    public static final List<String> availableGoogleCampaigns = List.of("Campaign G A", "Campaign G B", "Campaign G C");
-
     public static final List<String> availableUnknownCampaigns = List.of();
 
     private final UniformRandomProvider rng = RandomSource.XO_RO_SHI_RO_128_PP.create();
@@ -174,9 +168,9 @@ class User implements Runnable {
         int randomValue = rng.nextInt(1, 101);
 
         if (randomValue <= 10) {
-            return "Campaign Fb A";  // 10% probability
+            return "Flash Frenzy Weekend";  // 10% probability
         } else {
-            return "Campaign Fb B";  // 90% probability
+            return "Cart Buster Deals";  // 90% probability
         }
     }
 
@@ -184,11 +178,11 @@ class User implements Runnable {
         int randomValue = rng.nextInt(1, 101);
 
         if (randomValue <= 20) {
-            return "Campaign G A";  // 20% probability
+            return "New Year, New Finds";  // 20% probability
         } else if (randomValue <= 50) {
-            return "Campaign G B";  // 30% probability
+            return "12 Days of Savings";  // 30% probability
         } else {
-            return "Campaign G C";  // 50% probability
+            return "Summer Style Drop";  // 50% probability
         }
     }
 }
