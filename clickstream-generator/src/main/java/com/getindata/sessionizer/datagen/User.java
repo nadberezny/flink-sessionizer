@@ -154,27 +154,41 @@ class User implements Runnable {
     }
 
     private String generateCampaign(String channel) {
-        List<String> campaigns;
-
         switch (channel) {
             case "Facebook":
-                campaigns = availableFacebookCampaigns;
-                break;
+                return generateFacebookCampaign();
             case "Google":
-                campaigns = availableGoogleCampaigns;
-                break;
+                return generateGoogleCampaign();
             case "Unknown":
-                campaigns = availableUnknownCampaigns;
-                break;
+                if (availableUnknownCampaigns.isEmpty()) {
+                    return null;
+                }
+                int index = rng.nextInt(availableUnknownCampaigns.size());
+                return availableUnknownCampaigns.get(index);
             default:
                 return null;
         }
+    }
 
-        if (campaigns.isEmpty()) {
-            return null;
+    private String generateFacebookCampaign() {
+        int randomValue = rng.nextInt(1, 101);
+
+        if (randomValue <= 10) {
+            return "Campaign Fb A";  // 10% probability
+        } else {
+            return "Campaign Fb B";  // 90% probability
         }
+    }
 
-        int index = rng.nextInt(campaigns.size());
-        return campaigns.get(index);
+    private String generateGoogleCampaign() {
+        int randomValue = rng.nextInt(1, 101);
+
+        if (randomValue <= 20) {
+            return "Campaign G A";  // 20% probability
+        } else if (randomValue <= 50) {
+            return "Campaign G B";  // 30% probability
+        } else {
+            return "Campaign G C";  // 50% probability
+        }
     }
 }
