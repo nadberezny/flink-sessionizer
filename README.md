@@ -20,3 +20,8 @@ A module for applying schema migrations to ClickHouse database. More info in the
 
 ## Clickstream generator
 A module for generating clickstream. More info in the [README](clickstream-generator/README.md)
+
+## License
+
+This project is licensed under the Apache License 2.0 - see the [LICENSE](LICENSE) file for details.
+
