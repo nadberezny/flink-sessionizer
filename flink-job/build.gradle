@@ -40,23 +40,24 @@ configurations {
 dependencies {
     implementation "org.apache.flink:flink-streaming-java:${flinkVersion}"
     implementation "org.apache.flink:flink-clients:${flinkVersion}"
-    implementation("org.apache.flink:flink-connector-base:${flinkVersion}")
-    implementation("org.apache.flink:flink-connector-kafka:3.4.0-1.20")
+
+    flinkShadowJar("org.apache.flink:flink-connector-base:${flinkVersion}")
+    flinkShadowJar("org.apache.flink:flink-connector-kafka:3.4.0-1.20")
 
     // CDC
-    implementation("org.apache.flink:flink-connector-mysql-cdc:3.3.0")
-    implementation("io.debezium:debezium-connector-mysql:${debeziumVersion}")
+    flinkShadowJar("org.apache.flink:flink-connector-mysql-cdc:3.3.0")
+    flinkShadowJar("io.debezium:debezium-connector-mysql:${debeziumVersion}")
 
-    implementation("org.apache.kafka:kafka-clients:${kafkaVersion}")
-    implementation("commons-codec:commons-codec:1.18.0")
-    implementation("org.apache.commons:commons-lang3:3.17.0")
+    flinkShadowJar("org.apache.kafka:kafka-clients:${kafkaVersion}")
+    flinkShadowJar("commons-codec:commons-codec:1.18.0")
+    flinkShadowJar("org.apache.commons:commons-lang3:3.17.0")
 
     // external config
-    implementation("com.typesafe:config:1.4.3")
+    flinkShadowJar("com.typesafe:config:1.4.3")
 
     // serde
-    implementation("com.fasterxml.jackson.core:jackson-databind:2.0.1")
-    implementation("com.fasterxml.jackson.module:jackson-module-jaxb-annotations:2.0.1")
+    flinkShadowJar("com.fasterxml.jackson.core:jackson-databind:2.0.1")
+    flinkShadowJar("com.fasterxml.jackson.module:jackson-module-jaxb-annotations:2.0.1")
 
     // --------------------------------------------------------------
     // Dependencies that should be part of the shadow jar, e.g.
@@ -100,6 +101,10 @@ jar {
         attributes 'Built-By': System.getProperty('user.name'),
                 'Build-Jdk': System.getProperty('java.version')
     }
+}
+
+shadowJar {
+    configurations = [project.configurations.flinkShadowJar]
 }
 
 test {
