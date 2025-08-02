@@ -4,10 +4,10 @@ import com.getindata.flink.sessionizer.model.ClickStreamEvent;
 import com.getindata.flink.sessionizer.model.event.PageView;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.flink.api.common.ExecutionConfig;
+import org.apache.flink.api.common.serialization.SerializerConfigImpl;
 import org.apache.flink.api.common.typeinfo.Types;
 import org.apache.flink.api.common.typeutils.TypeSerializer;
 import org.apache.flink.api.java.tuple.Tuple2;
-import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.api.windowing.assigners.MergingWindowAssigner;
 import org.apache.flink.streaming.api.windowing.triggers.Trigger;
 
@@ -25,7 +25,7 @@ public class SessionElementWindowAssigner extends MergingWindowAssigner<ClickStr
 
     public SessionElementWindowAssigner(long sessionTimeout) {
         this.sessionTimeout = sessionTimeout;
-        serializer = Types.POJO(SessionTimeWindow.class).createSerializer(new ExecutionConfig());
+        serializer = Types.POJO(SessionTimeWindow.class).createSerializer(new SerializerConfigImpl());
     }
 
     @Override
@@ -78,7 +78,7 @@ public class SessionElementWindowAssigner extends MergingWindowAssigner<ClickStr
     }
 
     @Override
-    public Trigger<ClickStreamEvent, SessionTimeWindow> getDefaultTrigger(StreamExecutionEnvironment env) {
+    public Trigger<ClickStreamEvent, SessionTimeWindow> getDefaultTrigger() {
         return new OnEventFireTrigger<>();
     }
 

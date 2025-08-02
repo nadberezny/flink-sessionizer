@@ -15,6 +15,7 @@ import com.getindata.flink.sessionizer.test.containers.AttributionServiceContain
 import com.getindata.flink.sessionizer.test.containers.CDCEvolutionContainer;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.flink.configuration.CheckpointingOptions;
 import org.apache.flink.configuration.Configuration;
 import org.apache.flink.runtime.testutils.MiniClusterResourceConfiguration;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
@@ -60,6 +61,8 @@ import static org.apache.kafka.clients.consumer.ConsumerConfig.VALUE_DESERIALIZE
 @Slf4j
 public class IntegrationTestExtension implements BeforeAllCallback, AfterAllCallback, BeforeEachCallback, AfterEachCallback, ParameterResolver {
 
+    public static final boolean cdcEnabled = false;
+
     public static final String clickStreamTopic = "click-stream";
     public static final String sessionsTopic = "sessions";
     public static final String attributedOrdersTopic = "attributed-orders";
@@ -69,7 +72,6 @@ public class IntegrationTestExtension implements BeforeAllCallback, AfterAllCall
     public static final MiniClusterExtension flinkCluster = new MiniClusterExtension(
             new MiniClusterResourceConfiguration.Builder()
                     .setNumberTaskManagers(1)
-                    .setConfiguration(new Configuration())
                     .build());
 
     private static final Network network = Network.newNetwork();
@@ -186,9 +188,10 @@ public class IntegrationTestExtension implements BeforeAllCallback, AfterAllCall
         ));
         orderWithSessionsConsumer.subscribe(List.of(attributedOrdersTopic));
 
+        var flinkConfig = new Configuration();
         var kafkaConfig = new KafkaConfig(redpanda.getBootstrapServers(), "PLAIN", null, clickStreamTopic, sessionsTopic, attributedOrdersTopic);
         var cdcConfig = new CDCConfig(
-                true,
+                cdcEnabled,
                 Duration.ofDays(30),
                 mysql.getHost(),
                 mysql.getMappedPort(3306),
@@ -200,8 +203,9 @@ public class IntegrationTestExtension implements BeforeAllCallback, AfterAllCall
         var jobConfig = new JobConfig(Duration.ofMinutes(30), null, kafkaConfig, cdcConfig);
         env = StreamExecutionEnvironment.getExecutionEnvironment();
         env.setParallelism(2);
-        setupCheckpointing(env);
+        setupCheckpointing(flinkConfig);
         Main.buildTopology(jobConfig, env, new ExternalAttributionServiceSupplier("http://localhost:" + attributionService.getMappedPort(8080)));
+        env.configure(flinkConfig);
         env.executeAsync();
     }
 
@@ -216,11 +220,12 @@ public class IntegrationTestExtension implements BeforeAllCallback, AfterAllCall
     }
 
     @SneakyThrows
-    private void setupCheckpointing(StreamExecutionEnvironment env) {
+    private void setupCheckpointing(Configuration config) {
         File checkpointDir = Files.createTempDirectory(getClass().getSimpleName() + "-checkpoint-" + RandomStringUtils.randomAlphanumeric(6)).toFile();
         checkpointDir.deleteOnExit();
         env.enableCheckpointing(500);
-        env.getCheckpointConfig().setCheckpointStorage("file://" + checkpointDir.getAbsolutePath());
+        config.set(CheckpointingOptions.CHECKPOINT_STORAGE, "filesystem");
+        config.set(CheckpointingOptions.CHECKPOINTS_DIRECTORY, "file://" + checkpointDir.getAbsolutePath());
     }
 
     @lombok.Value

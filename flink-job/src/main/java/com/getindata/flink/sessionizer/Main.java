@@ -79,14 +79,16 @@ public class Main {
                 kafkaConfig.getKafkaProperties(),
                 kafkaConfig.getSessionsTopic(),
                 (KeySelector<SessionJson, String>) SessionJson::getSessionId,
-                SessionJson::getTimestamp);
+                SessionJson::getTimestamp,
+                "sessions");
 
         KafkaSink<AttributedOrderJson> attributedOrdersSink = KafkaJsonSinkFactory.create(
                 kafkaConfig.getBootstrapServers(),
                 kafkaConfig.getKafkaProperties(),
                 kafkaConfig.getAttributedOrdersTopic(),
                 (KeySelector<AttributedOrderJson, String>) AttributedOrderJson::getOrderId,
-                AttributedOrderJson::getTimestamp);
+                AttributedOrderJson::getTimestamp,
+                "attributed-orders");
 
         sessions
                 .filter(session -> !session.isOrder())

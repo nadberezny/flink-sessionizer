@@ -5,10 +5,10 @@ import com.getindata.flink.sessionizer.model.OrderWithSessions;
 import com.getindata.flink.sessionizer.model.Session;
 import com.getindata.flink.sessionizer.model.event.Order;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.flink.api.common.functions.OpenContext;
 import org.apache.flink.api.common.state.MapState;
 import org.apache.flink.api.common.state.MapStateDescriptor;
 import org.apache.flink.api.common.state.StateTtlConfig;
-import org.apache.flink.configuration.Configuration;
 import org.apache.flink.streaming.api.functions.KeyedProcessFunction;
 import org.apache.flink.util.Collector;
 
@@ -36,9 +36,9 @@ public class SessionProcessor extends KeyedProcessFunction<Key, Session, OrderWi
 
     private MapState<String, Session> sessionsCacheState;
 
-
     @Override
-    public void open(Configuration parameters) {
+    public void open(OpenContext openContext) throws Exception {
+        super.open(openContext);
         SESSIONS_CACHE_STATE_DESCRIPTOR.enableTimeToLive(
                 StateTtlConfig
                         .newBuilder(sessionStateTTL)
@@ -47,7 +47,6 @@ public class SessionProcessor extends KeyedProcessFunction<Key, Session, OrderWi
                         .build()
         );
         sessionsCacheState = getRuntimeContext().getMapState(SESSIONS_CACHE_STATE_DESCRIPTOR);
-
     }
 
     @Override

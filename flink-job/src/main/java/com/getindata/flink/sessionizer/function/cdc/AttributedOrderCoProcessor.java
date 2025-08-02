@@ -4,10 +4,10 @@ import com.getindata.flink.sessionizer.model.OrderWithAttributedSessions;
 import com.getindata.flink.sessionizer.model.cdc.OrderReturn;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.flink.api.common.functions.OpenContext;
 import org.apache.flink.api.common.state.StateTtlConfig;
 import org.apache.flink.api.common.state.ValueState;
 import org.apache.flink.api.common.state.ValueStateDescriptor;
-import org.apache.flink.configuration.Configuration;
 import org.apache.flink.streaming.api.functions.co.KeyedCoProcessFunction;
 import org.apache.flink.util.Collector;
 
@@ -25,7 +25,8 @@ public class AttributedOrderCoProcessor extends KeyedCoProcessFunction<String, O
     private ValueState<OrderWithAttributedSessions> attributedOrderState;
 
     @Override
-    public void open(Configuration parameters) {
+    public void open(OpenContext openContext) throws Exception {
+        super.open(openContext);
         StateTtlConfig stateTTLConfig = StateTtlConfig.newBuilder(stateTTL)
                 .setUpdateType(StateTtlConfig.UpdateType.OnCreateAndWrite)
                 .setStateVisibility(StateTtlConfig.StateVisibility.ReturnExpiredIfNotCleanedUp)

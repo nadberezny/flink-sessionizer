@@ -1,7 +1,6 @@
 plugins {
     id 'java'
     id 'application'
-    // shadow plugin to produce fat JARs
     id("com.gradleup.shadow") version "8.3.6"
     id("io.freefair.lombok") version "8.12.2.1"
 }
@@ -13,9 +12,9 @@ description = """Flink Quickstart Job"""
 ext {
     targetDockerImageName = 'nadberezny/flink-sessionizer'
     kafkaVersion = '3.9.0'
-    flinkVersion = '1.20.1'
-    debeziumVersion = '1.9.8.Final'
-    scalaBinaryVersion = '_2.12'
+    flinkVersion = '2.1.0'
+    debeziumVersion = '3.2.0.Final'
+    jacksonVersion = '2.19.2'
     slf4jVersion = '1.7.36'
     log4jVersion = '2.17.1'
     jupiterVersion = '5.10.2'
@@ -37,12 +36,26 @@ configurations {
     flinkShadowJar.exclude group: 'org.apache.logging.log4j'
 }
 
+configurations.configureEach {
+    resolutionStrategy {
+        force "com.fasterxml.jackson.core:jackson-core:${jacksonVersion}"
+        force "com.fasterxml.jackson.core:jackson-databind:${jacksonVersion}"
+        force "com.fasterxml.jackson.core:jackson-annotations:${jacksonVersion}"
+        force "com.fasterxml.jackson.module:jackson-module-jaxb-annotations:${jacksonVersion}"
+        force "com.fasterxml.jackson.datatype:jackson-datatype-jsr310:${jacksonVersion}"
+        force "com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:${jacksonVersion}"
+        force "com.fasterxml.jackson.dataformat:jackson-dataformat-csv:${jacksonVersion}"
+    }
+    exclude group: 'org.codehaus.jackson'
+}
+
+
 dependencies {
     implementation "org.apache.flink:flink-streaming-java:${flinkVersion}"
     implementation "org.apache.flink:flink-clients:${flinkVersion}"
 
     flinkShadowJar("org.apache.flink:flink-connector-base:${flinkVersion}")
-    flinkShadowJar("org.apache.flink:flink-connector-kafka:3.4.0-1.20")
+    flinkShadowJar("org.apache.flink:flink-connector-kafka:4.0.0-2.0")
 
     // CDC
     flinkShadowJar("org.apache.flink:flink-connector-mysql-cdc:3.3.0")
@@ -56,8 +69,8 @@ dependencies {
     flinkShadowJar("com.typesafe:config:1.4.3")
 
     // serde
-    flinkShadowJar("com.fasterxml.jackson.core:jackson-databind:2.0.1")
-    flinkShadowJar("com.fasterxml.jackson.module:jackson-module-jaxb-annotations:2.0.1")
+    flinkShadowJar("com.fasterxml.jackson.core:jackson-databind:${jacksonVersion}")
+    flinkShadowJar("com.fasterxml.jackson.module:jackson-module-jaxb-annotations:${jacksonVersion}")
 
     // --------------------------------------------------------------
     // Dependencies that should be part of the shadow jar, e.g.
@@ -92,7 +105,7 @@ run.classpath = sourceSets.main.runtimeClasspath
 
 java {
     toolchain {
-        languageVersion = JavaLanguageVersion.of(11)
+        languageVersion = JavaLanguageVersion.of(21)
     }
 }
 

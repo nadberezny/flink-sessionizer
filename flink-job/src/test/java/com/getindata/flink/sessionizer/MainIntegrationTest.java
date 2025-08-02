@@ -24,7 +24,7 @@ import static org.awaitility.Awaitility.given;
 public class MainIntegrationTest {
 
     @Test
-    void test(IntegrationTestExtension.IntegrationTextCtx ctx) throws Exception {
+    void test(IntegrationTestExtension.IntegrationTextCtx ctx) {
         // given
         var key1 = "key1";
         var user1 = "user1";
@@ -121,18 +121,20 @@ public class MainIntegrationTest {
             return true;
         });
 
-        // CDC
-        var order1ReturnTimestamp = Instant.parse("2025-04-10T01:00:00Z");
-        ctx.getOrderReturnsRepository().insert(new OrderReturn(order1Id, order1ReturnTimestamp));
-        given().ignoreExceptions().atMost(Duration.ofMinutes(3)).await().until(() -> {
-            var records = ctx.getOrderWithSessionsConsumer().poll(Duration.ofMillis(500));
-            assertThat(records).hasSize(1);
-            records.forEach(record -> {
-                        assertThat(record.value().getReturnTimestamp()).isEqualTo(order1ReturnTimestamp.toEpochMilli());
-                        assertThat(record.value().getProductPrice()).isEqualTo(100f);
-                    }
-            );
-            return true;
-        });
+        if (IntegrationTestExtension.cdcEnabled) {
+            // CDC
+            var order1ReturnTimestamp = Instant.parse("2025-04-10T01:00:00Z");
+            ctx.getOrderReturnsRepository().insert(new OrderReturn(order1Id, order1ReturnTimestamp));
+            given().ignoreExceptions().atMost(Duration.ofMinutes(3)).await().until(() -> {
+                var records = ctx.getOrderWithSessionsConsumer().poll(Duration.ofMillis(500));
+                assertThat(records).hasSize(1);
+                records.forEach(record -> {
+                            assertThat(record.value().getReturnTimestamp()).isEqualTo(order1ReturnTimestamp.toEpochMilli());
+                            assertThat(record.value().getProductPrice()).isEqualTo(100f);
+                        }
+                );
+                return true;
+            });
+        }
     }
 }

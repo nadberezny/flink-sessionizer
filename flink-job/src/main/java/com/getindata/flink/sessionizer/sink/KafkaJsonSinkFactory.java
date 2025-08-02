@@ -31,10 +31,12 @@ public class KafkaJsonSinkFactory {
             Properties kafkaProperties,
             String topic,
             KeySelector<V, String> keySelector,
-            SerializableFunction<V, Long> timestampProvider) {
+            SerializableFunction<V, Long> timestampProvider,
+            String transactionalIdPrefix) {
         var builder = KafkaSink.<V>builder()
                 .setBootstrapServers(bootstrapServers)
                 .setRecordSerializer(new SerializationSchema<>(topic, keySelector, timestampProvider))
+                .setTransactionalIdPrefix(transactionalIdPrefix)
                 .setDeliveryGuarantee(DeliveryGuarantee.AT_LEAST_ONCE);
 
         for (Map.Entry<Object, Object> property : kafkaProperties.entrySet()) {
